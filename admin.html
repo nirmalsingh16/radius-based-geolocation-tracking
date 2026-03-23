@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GeoAdmin — Control Panel</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050810;--s1:#090c18;--s2:#0e111e;--s3:#131624;
+  --border:#1a1e30;--border2:#222640;
+  --cyan:#00bcd4;--green:#00e676;--red:#ff3d5a;--amber:#ffab00;--purple:#b388ff;--blue:#40c4ff;
+  --text:#c8cde0;--sub:#7a8099;--muted:#2e3350;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;--r:8px;
+}
+html,body,#root{height:100%;overflow:hidden}
+body{font-family:var(--sans);background:var(--bg);color:var(--text)}
+
+/* ── LAYOUT ── */
+.shell{display:grid;grid-template-rows:54px 1fr;grid-template-columns:310px 1fr;height:100vh}
+.topbar{grid-column:1/-1;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;gap:16px;z-index:100}
+.sidebar{background:var(--s1);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.sidebar::-webkit-scrollbar{width:3px}.sidebar::-webkit-scrollbar-thumb{background:var(--border)}
+.main-area{display:grid;grid-template-rows:1fr 220px;overflow:hidden;position:relative}
+
+/* ── TOPBAR ── */
+.brand{display:flex;align-items:center;gap:10px}
+.brand-logo{width:34px;height:34px;background:linear-gradient(135deg,var(--cyan),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.brand-name{font-weight:800;font-size:14px;color:#fff;letter-spacing:.03em}
+.brand-tag{font-family:var(--mono);font-size:8px;color:var(--sub);letter-spacing:.14em;text-transform:uppercase}
+.api-row{display:flex;align-items:center;gap:7px}
+.api-inp{background:var(--s2);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;font-family:var(--mono);font-size:10px;color:var(--text);outline:none;width:185px;transition:border .15s}
+.api-inp:focus{border-color:var(--cyan)}
+.api-lbl{font-size:10px;color:var(--sub);white-space:nowrap}
+.conn-btn{background:var(--s2);border:1px solid var(--border2);color:var(--sub);font-family:var(--mono);font-size:9px;text-transform:uppercase;padding:6px 12px;border-radius:6px;cursor:pointer;transition:all .15s}
+.conn-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.stat-pills{display:flex;gap:6px}
+.spill{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:4px 12px;text-align:center;min-width:72px}
+.spill-v{font-family:var(--mono);font-size:13px;font-weight:600;line-height:1.3;color:var(--cyan)}
+.spill-l{font-size:8px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em}
+.conn-status{display:flex;align-items:center;gap:7px}
+.conn-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s}
+.conn-dot.on{background:var(--green);animation:sonar 2s ease-out infinite}
+.conn-dot.err{background:var(--red)}
+@keyframes sonar{0%{box-shadow:0 0 0 0 rgba(0,230,118,.5)}70%{box-shadow:0 0 0 10px rgba(0,230,118,0)}100%{box-shadow:0 0 0 0 rgba(0,230,118,0)}}
+.conn-lbl{font-family:var(--mono);font-size:9px;color:var(--sub)}
+
+/* ── SIDEBAR ── */
+.sb-sec{border-bottom:1px solid var(--border)}
+.sb-sec-hdr{padding:11px 14px;font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.16em;color:var(--sub);display:flex;justify-content:space-between;align-items:center}
+.sb-sec-badge{background:var(--s3);border:1px solid var(--border);border-radius:3px;font-size:9px;padding:1px 7px;color:var(--cyan)}
+.sb-body{padding:12px 14px}
+
+/* Form */
+.fld{margin-bottom:11px}
+.fld label{display:block;font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.12em;color:var(--sub);margin-bottom:5px}
+.fld input,.fld select{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--mono);font-size:11px;color:var(--text);outline:none;transition:border .15s}
+.fld input:focus,.fld select:focus{border-color:var(--cyan)}
+.fld-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{width:100%;padding:9px;border-radius:6px;font-family:var(--mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;border:none;cursor:pointer;transition:all .15s;margin-bottom:5px}
+.btn-primary{background:var(--cyan);color:#000}.btn-primary:hover{background:#33d6e8;box-shadow:0 0 18px rgba(0,188,212,.3)}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--sub)}.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-sm{padding:4px 10px;font-size:8px;width:auto;margin:0}
+.btn-danger{background:transparent;border:1px solid var(--red);color:var(--red)}.btn-danger:hover{background:rgba(255,61,90,.08)}
+.pick-hint{font-family:var(--mono);font-size:9px;color:var(--sub);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+
+/* Zone list */
+.zone-item{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.zone-item:hover,.zone-item.sel{border-color:var(--cyan)}
+.zone-item.sel{background:rgba(0,188,212,.04)}
+.zi-name{font-weight:600;font-size:12px;color:#fff;display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.zi-badge{font-family:var(--mono);font-size:7px;padding:1px 6px;border-radius:2px}
+.zi-on{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.25)}
+.zi-off{background:rgba(255,61,90,.08);color:var(--red);border:1px solid rgba(255,61,90,.2)}
+.zi-meta{font-family:var(--mono);font-size:9px;color:var(--sub);display:flex;gap:8px;flex-wrap:wrap}
+.zi-acts{display:flex;gap:4px;margin-top:7px}
+
+/* User list */
+.user-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)}
+.user-item:last-child{border:none}
+.u-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.u-name{font-size:12px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.u-email{font-family:var(--mono);font-size:9px;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px}
+.u-status{font-family:var(--mono);font-size:9px;font-weight:600}
+
+/* ── MAP ── */
+.map-wrap{position:relative;overflow:hidden}
+#map{width:100%;height:100%}
+.leaflet-container{background:#030508!important}
+.leaflet-tile{filter:brightness(.28) saturate(.1) hue-rotate(210deg)}
+.leaflet-control-zoom a{background:var(--s1)!important;color:var(--text)!important;border-color:var(--border)!important}
+.leaflet-control-attribution{display:none!important}
+
+/* Map overlays */
+.map-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:700;background:rgba(9,12,24,.8);border:1px solid var(--border2);border-radius:20px;padding:6px 16px;font-family:var(--mono);font-size:9px;color:var(--sub);pointer-events:none;white-space:nowrap}
+
+/* ── EVENTS TABLE ── */
+.events-panel{background:var(--s1);border-top:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.ep-hdr{padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ep-title{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.16em;color:var(--sub)}
+.ep-scroll{flex:1;overflow-y:auto}.ep-scroll::-webkit-scrollbar{width:3px}.ep-scroll::-webkit-scrollbar-thumb{background:var(--border)}
+table{width:100%;border-collapse:collapse}
+thead th{font-family:var(--mono);font-size:7px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);padding:5px 12px;text-align:left;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--s1)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:hover{background:var(--s2)}
+tbody td{font-family:var(--mono);font-size:9px;padding:5px 12px;color:var(--text)}
+.ev-enter{color:var(--green)}.ev-exit{color:var(--red)}.ev-info{color:var(--amber)}
+
+/* ── TOAST ── */
+.notif{position:fixed;top:62px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.n-item{background:var(--s1);border:1px solid var(--border2);border-radius:6px;padding:8px 14px;font-family:var(--mono);font-size:10px;box-shadow:0 4px 20px rgba(0,0,0,.5);animation:nIn .25s ease-out}
+@keyframes nIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+.n-ok{border-left:3px solid var(--green);color:var(--green)}
+.n-err{border-left:3px solid var(--red);color:var(--red)}
+.n-info{border-left:3px solid var(--cyan);color:var(--cyan)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+function fmtDist(d){ return d>=1000?(d/1000).toFixed(2)+' km':Math.round(d)+' m'; }
+function fmtTime(d){ return new Date(d).toLocaleTimeString(); }
+
+async function api(base,path,opts={}){
+  const r=await fetch(base+path,{headers:{'Content-Type':'application/json'},...opts,body:opts.body?JSON.stringify(opts.body):undefined});
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error||r.statusText);}
+  return r.json();
+}
+
+/* ── STAT PILL ── */
+function Pill({label,value,color}){
+  return <div className="spill"><div className="spill-v" style={{color}}>{value}</div><div className="spill-l">{label}</div></div>;
+}
+
+/* ── ZONE FORM ── */
+function ZoneForm({apiBase,editZone,onSaved,notify}){
+  const [name,setName]=useState(editZone?.name||'');
+  const [lat,setLat]=useState(editZone?.lat||'');
+  const [lng,setLng]=useState(editZone?.lng||'');
+  const [radius,setRadius]=useState(editZone?.radius||500);
+  const [active,setActive]=useState(editZone?.active!==false);
+
+  useEffect(()=>{
+    setName(editZone?.name||'');setLat(editZone?.lat||'');
+    setLng(editZone?.lng||'');setRadius(editZone?.radius||500);
+    setActive(editZone?.active!==false);
+  },[editZone]);
+
+  async function save(){
+    if(!name||!lat||!lng){notify('Name, Lat, Lng required','err');return;}
+    const payload={name,lat:+lat,lng:+lng,radius:+radius,active};
+    try{
+      if(editZone?._id){ await api(apiBase,'/api/zones/'+editZone._id,{method:'PUT',body:payload}); notify('Zone updated ✓','ok'); }
+      else { await api(apiBase,'/api/zones',{method:'POST',body:payload}); notify('Zone created ✓','ok'); }
+      onSaved();
+    }catch(e){notify(e.message,'err');}
+  }
+
+  return (
+    <div className="sb-body">
+      <div className="fld"><label>Zone Name</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="Office Premises"/></div>
+      <div className="fld-row">
+        <div className="fld"><label>Latitude</label><input type="number" step="any" value={lat} onChange={e=>setLat(e.target.value)} placeholder="28.6139"/></div>
+        <div className="fld"><label>Longitude</label><input type="number" step="any" value={lng} onChange={e=>setLng(e.target.value)} placeholder="77.2090"/></div>
+      </div>
+      <div className="fld"><label>Radius (meters)</label><input type="number" value={radius} onChange={e=>setRadius(e.target.value)} min="50" max="100000"/></div>
+      <div className="fld"><label>Status</label>
+        <select value={active} onChange={e=>setActive(e.target.value==='true')}>
+          <option value="true">Active</option><option value="false">Inactive</option>
+        </select>
+      </div>
+      <div className="pick-hint">⌖ Click map to set center point</div>
+      <button className="btn btn-primary" onClick={save}>💾 {editZone?._id?'Update':'Create'} Zone</button>
+    </div>
+  );
+}
+
+/* ── ADMIN APP ── */
+function AdminApp(){
+  const [apiBase,setApiBase]=useState('http://localhost:3000');
+  const [apiInput,setApiInput]=useState('http://localhost:3000');
+  const [connected,setConnected]=useState(false);
+  const [connErr,setConnErr]=useState(false);
+  const [stats,setStats]=useState({totalZones:0,activeUsers:0,totalEvents:0,insideCount:0,registeredUsers:0});
+  const [zones,setZones]=useState([]);
+  const [users,setUsers]=useState([]);
+  const [liveUsers,setLiveUsers]=useState([]);
+  const [events,setEvents]=useState([]);
+  const [editZone,setEditZone]=useState(null);
+  const [selZone,setSelZone]=useState(null);
+  const [toasts,setToasts]=useState([]);
+  const [pickMode,setPickMode]=useState(false);
+  const [evtFilter,setEvtFilter]=useState('');
+
+  const mapRef=useRef(null);
+  const leafletRef=useRef(null);
+  const zoneLayerRef=useRef(null);
+  const userLayerRef=useRef(null);
+  const pickModeRef=useRef(false);
+  pickModeRef.current=pickMode;
+
+  const notify=useCallback((msg,type='info')=>{
+    const id=Date.now();
+    setToasts(p=>[...p,{id,msg,type}]);
+    setTimeout(()=>setToasts(p=>p.filter(t=>t.id!==id)),3500);
+  },[]);
+
+  /* Init map */
+  useEffect(()=>{
+    const L=window.L;
+    const map=L.map(mapRef.current,{zoomControl:true,attributionControl:false}).setView([20.59,78.96],5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+    zoneLayerRef.current=L.layerGroup().addTo(map);
+    userLayerRef.current=L.layerGroup().addTo(map);
+    leafletRef.current=map;
+
+    map.on('click',e=>{
+      if(!pickModeRef.current)return;
+      setEditZone(prev=>({...prev,lat:e.latlng.lat.toFixed(6),lng:e.latlng.lng.toFixed(6)}));
+      setPickMode(false);
+      notify(`Center: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`,'info');
+    });
+
+    return()=>map.remove();
+  },[]);
+
+  /* Toggle crosshair */
+  useEffect(()=>{
+    if(mapRef.current) mapRef.current.style.cursor=pickMode?'crosshair':'';
+  },[pickMode]);
+
+  /* Render zones on map */
+  useEffect(()=>{
+    const L=window.L;
+    if(!zoneLayerRef.current)return;
+    zoneLayerRef.current.clearLayers();
+    zones.forEach(z=>{
+      const col=z.active?'#00e676':'#3d4460';
+      L.circle([z.lat,z.lng],{radius:z.radius,color:col,fillColor:col,fillOpacity:.06,weight:1.5,dashArray:'6 4'}).addTo(zoneLayerRef.current);
+      L.circleMarker([z.lat,z.lng],{radius:6,color:'#000',fillColor:col,fillOpacity:1,weight:2})
+        .bindTooltip(`<span style="font-family:JetBrains Mono,monospace;font-size:10px">${z.name}<br>${fmtDist(z.radius)}</span>`,{direction:'top'})
+        .addTo(zoneLayerRef.current);
+    });
+  },[zones]);
+
+  /* Render live users on map */
+  useEffect(()=>{
+    const L=window.L;
+    if(!userLayerRef.current)return;
+    userLayerRef.current.clearLayers();
+    liveUsers.forEach(u=>{
+      if(!u.lat||!u.lng)return;
+      const col=u.isInside?'#00e676':'#ff3d5a';
+      L.circleMarker([u.lat,u.lng],{radius:7,color:'#000',fillColor:col,fillOpacity:1,weight:2})
+        .bindTooltip(`<span style="font-family:JetBrains Mono,monospace;font-size:10px;color:${col}">${u.name}<br>${u.email}<br>${u.isInside?'▲ Inside':'▼ Outside'} · ${fmtDist(u.distanceToCenter)}</span>`,{direction:'top'})
+        .addTo(userLayerRef.current);
+    });
+  },[liveUsers]);
+
+  async function loadAll(){
+    try{
+      const [s,z,u,lu]=await Promise.all([
+        api(apiBase,'/api/stats'),
+        api(apiBase,'/api/zones'),
+        api(apiBase,'/api/users'),
+        api(apiBase,'/api/users/live'),
+      ]);
+      setStats(s);setZones(z);setUsers(u);setLiveUsers(lu);
+      setConnected(true);setConnErr(false);
+      await loadEvents(z);
+      notify('Connected to '+apiBase,'ok');
+    }catch(e){setConnected(false);setConnErr(true);notify(e.message,'err');}
+  }
+
+  async function loadEvents(zList=zones){
+    try{
+      const url='/api/events?limit=80'+(evtFilter?'&zoneId='+evtFilter:'');
+      const data=await api(apiBase,url);
+      setEvents(data.events||[]);
+    }catch{}
+  }
+
+  async function deleteZone(id){
+    if(!confirm('Delete this zone?'))return;
+    try{await api(apiBase,'/api/zones/'+id,{method:'DELETE'});notify('Zone deleted','info');loadAll();}
+    catch(e){notify(e.message,'err');}
+  }
+
+  /* Auto-refresh */
+  useEffect(()=>{
+    if(!connected)return;
+    const t1=setInterval(()=>{ api(apiBase,'/api/users/live').then(setLiveUsers).catch(()=>{}); api(apiBase,'/api/stats').then(setStats).catch(()=>{}); },5000);
+    const t2=setInterval(loadEvents,15000);
+    return()=>{clearInterval(t1);clearInterval(t2);};
+  },[connected,apiBase,evtFilter]);
+
+  return (
+    <div className="shell">
+      {/* TOPBAR */}
+      <header className="topbar">
+        <div className="brand">
+          <div className="brand-logo">🛰</div>
+          <div><div className="brand-name">GeoAdmin</div><div className="brand-tag">Control Panel</div></div>
+        </div>
+        <div className="api-row">
+          <span className="api-lbl">API:</span>
+          <input className="api-inp" value={apiInput} onChange={e=>setApiInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&(setApiBase(apiInput),loadAll())}/>
+          <button className="conn-btn" onClick={()=>{setApiBase(apiInput);loadAll();}}>Connect</button>
+        </div>
+        <div className="stat-pills">
+          <Pill label="Zones" value={stats.totalZones} color="var(--cyan)"/>
+          <Pill label="Registered" value={stats.registeredUsers} color="var(--purple)"/>
+          <Pill label="Live" value={stats.activeUsers} color="var(--blue)"/>
+          <Pill label="Inside" value={stats.insideCount} color="var(--green)"/>
+          <Pill label="Events" value={stats.totalEvents} color="var(--amber)"/>
+        </div>
+        <div className="conn-status">
+          <div className={`conn-dot ${connected?'on':''}${connErr?' err':''}`}/>
+          <span className="conn-lbl">{connected?'Connected':connErr?'Error':'Disconnected'}</span>
+        </div>
+      </header>
+
+      {/* SIDEBAR */}
+      <aside className="sidebar">
+        {/* Zone form */}
+        <div className="sb-sec">
+          <div className="sb-sec-hdr">
+            ➕ {editZone?._id?'Edit Zone':'New Zone'}
+            <div style={{display:'flex',gap:6}}>
+              <button className="btn-sm btn-ghost" style={{padding:'3px 8px',fontSize:8}} onClick={()=>{setPickMode(p=>!p);}}>
+                {pickMode?'Cancel Pick':'Pick on Map'}
+              </button>
+              <span className="sb-sec-badge">{editZone?._id?'EDIT':'NEW'}</span>
+            </div>
+          </div>
+          <ZoneForm apiBase={apiBase} editZone={editZone} onSaved={()=>{setEditZone(null);loadAll();}} notify={notify}/>
+          {editZone?._id&&<div style={{padding:'0 14px 12px'}}><button className="btn btn-ghost" onClick={()=>setEditZone(null)}>✕ Cancel Edit</button></div>}
+        </div>
+
+        {/* Zone list */}
+        <div className="sb-sec">
+          <div className="sb-sec-hdr">📍 Zones<span className="sb-sec-badge">{zones.length}</span></div>
+          <div className="sb-body">
+            {zones.length===0&&<div style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--sub)'}}>No zones yet. Create one above.</div>}
+            {zones.map(z=>(
+              <div key={z._id} className={`zone-item ${selZone===z._id?'sel':''}`} onClick={()=>{setSelZone(z._id);leafletRef.current?.setView([z.lat,z.lng],15);}}>
+                <div className="zi-name">
+                  <span style={{flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{z.name}</span>
+                  <span className={`zi-badge ${z.active?'zi-on':'zi-off'}`}>{z.active?'ON':'OFF'}</span>
+                </div>
+                <div className="zi-meta">
+                  <span>📍 {z.lat.toFixed(4)}, {z.lng.toFixed(4)}</span>
+                  <span>⊙ {fmtDist(z.radius)}</span>
+                </div>
+                <div className="zi-acts">
+                  <button className="btn btn-ghost btn-sm" onClick={e=>{e.stopPropagation();setEditZone(z);}}>✏ Edit</button>
+                  <button className="btn btn-danger btn-sm" onClick={e=>{e.stopPropagation();deleteZone(z._id);}}>✕ Del</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Live + Registered Users */}
+        <div className="sb-sec" style={{flex:1}}>
+          <div className="sb-sec-hdr">👤 Users<span className="sb-sec-badge">{users.length}</span></div>
+          <div className="sb-body">
+            {users.length===0&&<div style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--sub)'}}>No users registered yet.</div>}
+            {users.map(u=>{
+              const live=liveUsers.find(l=>l._id===u._id||l.email===u.email);
+              const isLive=!!live;
+              return (
+                <div key={u._id} className="user-item">
+                  <div className="u-dot" style={{background:isLive?(u.isInside?'var(--green)':'var(--red)'):'var(--muted)'}}/>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div className="u-name">{u.name}</div>
+                    <div className="u-email">{u.email}</div>
+                  </div>
+                  {isLive&&<span className="u-status" style={{color:u.isInside?'var(--green)':'var(--red)'}}>{u.isInside?'▲ IN':'▼ OUT'}</span>}
+                  {!isLive&&<span className="u-status" style={{color:'var(--muted)'}}>offline</span>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </aside>
+
+      {/* MAIN AREA */}
+      <main className="main-area">
+        {/* Map */}
+        <div className="map-wrap">
+          <div id="map" ref={mapRef} style={{width:'100%',height:'100%'}}/>
+          <div className="map-hint">{pickMode?'⌖ Click anywhere to set zone center':'🟡 Center  🟢 Inside user  🔴 Outside user'}</div>
+        </div>
+
+        {/* Events table */}
+        <div className="events-panel">
+          <div className="ep-hdr">
+            <span className="ep-title">📋 Event Log</span>
+            <div style={{display:'flex',gap:8,alignItems:'center'}}>
+              <select className="api-inp" style={{width:140,padding:'3px 7px',fontSize:9}} value={evtFilter} onChange={e=>{setEvtFilter(e.target.value);loadEvents();}}>
+                <option value="">All Zones</option>
+                {zones.map(z=><option key={z._id} value={z._id}>{z.name}</option>)}
+              </select>
+              <button className="conn-btn" style={{padding:'4px 10px',fontSize:8}} onClick={loadEvents}>↺ Refresh</button>
+            </div>
+          </div>
+          <div className="ep-scroll">
+            <table>
+              <thead><tr><th>Type</th><th>User</th><th>Email</th><th>Zone</th><th>Distance</th><th>Time</th></tr></thead>
+              <tbody>
+                {events.map(e=>(
+                  <tr key={e._id}>
+                    <td className={`ev-${e.type}`}>{e.type==='enter'?'↗ ENTER':e.type==='exit'?'↙ EXIT':'⊙ INFO'}</td>
+                    <td>{e.userName||'—'}</td>
+                    <td style={{color:'var(--sub)'}}>{e.userEmail||'—'}</td>
+                    <td>{e.zoneName||'—'}</td>
+                    <td>{e.distanceToCenter?fmtDist(e.distanceToCenter):'—'}</td>
+                    <td style={{color:'var(--sub)'}}>{fmtTime(e.createdAt)}</td>
+                  </tr>
+                ))}
+                {events.length===0&&<tr><td colSpan="6" style={{textAlign:'center',color:'var(--muted)',padding:16}}>No events yet</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      {/* Toasts */}
+      <div className="notif">
+        {toasts.map(t=><div key={t.id} className={`n-item n-${t.type}`}>{t.msg}</div>)}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<AdminApp/>);
+</script>
+</body>
+</html>
