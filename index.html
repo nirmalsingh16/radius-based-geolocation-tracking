@@ -1,572 +1,1380 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>Geofence Tracker</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#060911;--s1:#0b0e1a;--s2:#101422;--s3:#161b2a;
-  --border:#1d2236;--border2:#252b40;
-  --green:#00e676;--red:#ff3d5a;--amber:#ffab00;--blue:#40c4ff;--purple:#b388ff;
-  --text:#cdd2e8;--sub:#8892b0;--muted:#3d4460;
-  --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;
-  --r:8px;
-}
-html,body,#root{height:100%;overflow:hidden}
-body{font-family:var(--sans);background:var(--bg);color:var(--text)}
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>Geofence Tracker</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #060911;
+        --s1: #0b0e1a;
+        --s2: #101422;
+        --s3: #161b2a;
+        --border: #1d2236;
+        --border2: #252b40;
+        --green: #00e676;
+        --red: #ff3d5a;
+        --amber: #ffab00;
+        --blue: #40c4ff;
+        --purple: #b388ff;
+        --text: #cdd2e8;
+        --sub: #8892b0;
+        --muted: #3d4460;
+        --mono: "JetBrains Mono", monospace;
+        --sans: "Inter", sans-serif;
+        --r: 8px;
+      }
+      html,
+      body,
+      #root {
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        font-family: var(--sans);
+        background: var(--bg);
+        color: var(--text);
+      }
 
-/* ── MAP ── */
-.leaflet-container{background:#040609!important}
-.leaflet-tile{filter:brightness(.3) saturate(.12) hue-rotate(210deg)}
-.leaflet-control-zoom a{background:var(--s1)!important;color:var(--text)!important;border-color:var(--border)!important}
-.leaflet-control-attribution{display:none!important}
+      /* ── MAP ── */
+      .leaflet-container {
+        background: #040609 !important;
+      }
+      .leaflet-tile {
+        filter: brightness(0.3) saturate(0.12) hue-rotate(210deg);
+      }
+      .leaflet-control-zoom a {
+        background: var(--s1) !important;
+        color: var(--text) !important;
+        border-color: var(--border) !important;
+      }
+      .leaflet-control-attribution {
+        display: none !important;
+      }
 
-/* ── REGISTRATION OVERLAY ── */
-.reg-overlay{
-  position:fixed;inset:0;z-index:9999;
-  background:rgba(4,6,9,.96);
-  backdrop-filter:blur(12px);
-  display:flex;align-items:center;justify-content:center;
-  animation:fadeIn .4s ease;
-}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+      /* ── REGISTRATION OVERLAY ── */
+      .reg-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(4, 6, 9, 0.96);
+        backdrop-filter: blur(12px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.4s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
 
-.reg-card{
-  background:var(--s1);
-  border:1px solid var(--border2);
-  border-radius:20px;
-  width:92%;max-width:400px;
-  overflow:hidden;
-  box-shadow:0 40px 80px rgba(0,0,0,.7);
-  animation:slideUp .45s cubic-bezier(.22,.61,.36,1);
-}
-@keyframes slideUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
+      .reg-card {
+        background: var(--s1);
+        border: 1px solid var(--border2);
+        border-radius: 20px;
+        width: 92%;
+        max-width: 400px;
+        overflow: hidden;
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7);
+        animation: slideUp 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+      }
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(32px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-.reg-hero{
-  background:linear-gradient(135deg,#0d2040 0%,#0a1a30 50%,#08142a 100%);
-  padding:32px 28px 28px;
-  text-align:center;
-  position:relative;overflow:hidden;
-}
-.reg-hero::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse at 50% 120%,rgba(0,230,118,.12) 0%,transparent 65%);
-}
-.reg-icon{
-  font-size:52px;margin-bottom:12px;
-  filter:drop-shadow(0 0 20px rgba(0,230,118,.4));
-  animation:bob 3s ease-in-out infinite;
-}
-@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.reg-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px;position:relative}
-.reg-sub{font-size:13px;color:var(--sub);position:relative}
+      .reg-hero {
+        background: linear-gradient(
+          135deg,
+          #0d2040 0%,
+          #0a1a30 50%,
+          #08142a 100%
+        );
+        padding: 32px 28px 28px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .reg-hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          ellipse at 50% 120%,
+          rgba(0, 230, 118, 0.12) 0%,
+          transparent 65%
+        );
+      }
+      .reg-icon {
+        font-size: 52px;
+        margin-bottom: 12px;
+        filter: drop-shadow(0 0 20px rgba(0, 230, 118, 0.4));
+        animation: bob 3s ease-in-out infinite;
+      }
+      @keyframes bob {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-6px);
+        }
+      }
+      .reg-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 4px;
+        position: relative;
+      }
+      .reg-sub {
+        font-size: 13px;
+        color: var(--sub);
+        position: relative;
+      }
 
-.reg-zone-pill{
-  display:inline-flex;align-items:center;gap:6px;
-  background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.25);
-  border-radius:20px;padding:5px 14px;
-  font-family:var(--mono);font-size:10px;color:var(--green);
-  margin:14px auto 0;letter-spacing:.06em;position:relative;
-}
-.reg-zone-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s ease-out infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,230,118,.5)}70%{box-shadow:0 0 0 8px rgba(0,230,118,0)}100%{box-shadow:0 0 0 0 rgba(0,230,118,0)}}
+      .reg-zone-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(0, 230, 118, 0.1);
+        border: 1px solid rgba(0, 230, 118, 0.25);
+        border-radius: 20px;
+        padding: 5px 14px;
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--green);
+        margin: 14px auto 0;
+        letter-spacing: 0.06em;
+        position: relative;
+      }
+      .reg-zone-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        animation: pulse 1.5s ease-out infinite;
+      }
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.5);
+        }
+        70% {
+          box-shadow: 0 0 0 8px rgba(0, 230, 118, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(0, 230, 118, 0);
+        }
+      }
 
-.reg-body{padding:26px 26px 28px}
+      .reg-body {
+        padding: 26px 26px 28px;
+      }
 
-.field{margin-bottom:16px}
-.field label{display:block;font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
-.field input{
-  width:100%;background:var(--s2);border:1px solid var(--border);
-  border-radius:var(--r);padding:11px 14px;
-  font-family:var(--sans);font-size:14px;color:var(--text);outline:none;
-  transition:border .15s,box-shadow .15s;
-}
-.field input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,230,118,.12)}
-.field input::placeholder{color:var(--muted)}
+      .field {
+        margin-bottom: 16px;
+      }
+      .field label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--sub);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 6px;
+      }
+      .field input {
+        width: 100%;
+        background: var(--s2);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 11px 14px;
+        font-family: var(--sans);
+        font-size: 14px;
+        color: var(--text);
+        outline: none;
+        transition:
+          border 0.15s,
+          box-shadow 0.15s;
+      }
+      .field input:focus {
+        border-color: var(--green);
+        box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.12);
+      }
+      .field input::placeholder {
+        color: var(--muted);
+      }
 
-.reg-info{
-  background:var(--s2);border:1px solid var(--border);border-radius:var(--r);
-  padding:12px 14px;margin-bottom:18px;
-}
-.reg-info-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0}
-.reg-info-lbl{font-family:var(--mono);font-size:9px;color:var(--sub);text-transform:uppercase}
-.reg-info-val{font-family:var(--mono);font-size:11px;font-weight:600}
+      .reg-info {
+        background: var(--s2);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 12px 14px;
+        margin-bottom: 18px;
+      }
+      .reg-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 3px 0;
+      }
+      .reg-info-lbl {
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--sub);
+        text-transform: uppercase;
+      }
+      .reg-info-val {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 600;
+      }
 
-.reg-btn{
-  width:100%;padding:13px;
-  background:var(--green);color:#050d07;
-  font-family:var(--sans);font-weight:700;font-size:14px;
-  border:none;border-radius:var(--r);cursor:pointer;
-  transition:all .2s;letter-spacing:.02em;
-}
-.reg-btn:hover:not(:disabled){background:#33ee88;box-shadow:0 8px 24px rgba(0,230,118,.3);transform:translateY(-1px)}
-.reg-btn:active{transform:translateY(0)}
-.reg-btn:disabled{background:var(--s3);color:var(--muted);cursor:not-allowed;transform:none;box-shadow:none}
+      .reg-btn {
+        width: 100%;
+        padding: 13px;
+        background: var(--green);
+        color: #050d07;
+        font-family: var(--sans);
+        font-weight: 700;
+        font-size: 14px;
+        border: none;
+        border-radius: var(--r);
+        cursor: pointer;
+        transition: all 0.2s;
+        letter-spacing: 0.02em;
+      }
+      .reg-btn:hover:not(:disabled) {
+        background: #33ee88;
+        box-shadow: 0 8px 24px rgba(0, 230, 118, 0.3);
+        transform: translateY(-1px);
+      }
+      .reg-btn:active {
+        transform: translateY(0);
+      }
+      .reg-btn:disabled {
+        background: var(--s3);
+        color: var(--muted);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
 
-.reg-err{
-  color:var(--red);font-family:var(--mono);font-size:10px;
-  text-align:center;margin-top:10px;
-  padding:8px 12px;background:rgba(255,61,90,.08);border:1px solid rgba(255,61,90,.2);border-radius:6px;
-}
-.reg-note{font-family:var(--mono);font-size:9px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.7}
+      .reg-err {
+        color: var(--red);
+        font-family: var(--mono);
+        font-size: 10px;
+        text-align: center;
+        margin-top: 10px;
+        padding: 8px 12px;
+        background: rgba(255, 61, 90, 0.08);
+        border: 1px solid rgba(255, 61, 90, 0.2);
+        border-radius: 6px;
+      }
+      .reg-note {
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 12px;
+        line-height: 1.7;
+      }
 
-/* ── MAIN APP LAYOUT ── */
-.app{display:flex;flex-direction:column;height:100%}
+      /* ── MAIN APP LAYOUT ── */
+      .app {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
 
-/* ── TOPBAR ── */
-.topbar{
-  height:54px;flex-shrink:0;z-index:500;
-  background:var(--s1);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;padding:0 18px;gap:12px;
-}
-.brand{display:flex;align-items:center;gap:10px}
-.live-dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s}
-.live-dot.on{background:var(--green);animation:sonar 2s ease-out infinite}
-.live-dot.err{background:var(--red)}
-@keyframes sonar{0%{box-shadow:0 0 0 0 rgba(0,230,118,.5)}70%{box-shadow:0 0 0 11px rgba(0,230,118,0)}100%{box-shadow:0 0 0 0 rgba(0,230,118,0)}}
-.brand-name{font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#fff}
-.brand-sub{font-family:var(--mono);font-size:9px;color:var(--sub)}
-.topbar-pills{display:flex;gap:6px}
-.tpill{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:4px 12px;text-align:center;min-width:72px}
-.tpill-v{font-family:var(--mono);font-size:13px;font-weight:600;line-height:1.3}
-.tpill-l{font-size:8px;color:var(--sub);text-transform:uppercase;letter-spacing:.1em}
-.user-chip{display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:4px 12px 4px 6px}
-.user-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#000;flex-shrink:0}
-.user-chip-name{font-size:12px;font-weight:500;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      /* ── TOPBAR ── */
+      .topbar {
+        height: 54px;
+        flex-shrink: 0;
+        z-index: 500;
+        background: var(--s1);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 18px;
+        gap: 12px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .live-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--muted);
+        flex-shrink: 0;
+        transition: background 0.3s;
+      }
+      .live-dot.on {
+        background: var(--green);
+        animation: sonar 2s ease-out infinite;
+      }
+      .live-dot.err {
+        background: var(--red);
+      }
+      @keyframes sonar {
+        0% {
+          box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.5);
+        }
+        70% {
+          box-shadow: 0 0 0 11px rgba(0, 230, 118, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(0, 230, 118, 0);
+        }
+      }
+      .brand-name {
+        font-weight: 700;
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #fff;
+      }
+      .brand-sub {
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--sub);
+      }
+      .topbar-pills {
+        display: flex;
+        gap: 6px;
+      }
+      .tpill {
+        background: var(--s2);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 4px 12px;
+        text-align: center;
+        min-width: 72px;
+      }
+      .tpill-v {
+        font-family: var(--mono);
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.3;
+      }
+      .tpill-l {
+        font-size: 8px;
+        color: var(--sub);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      .user-chip {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--s2);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 4px 12px 4px 6px;
+      }
+      .user-avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: #000;
+        flex-shrink: 0;
+      }
+      .user-chip-name {
+        font-size: 12px;
+        font-weight: 500;
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
 
-/* ── MAP AREA ── */
-.map-area{flex:1;position:relative;overflow:hidden}
-#map{width:100%;height:100%}
+      /* ── MAP AREA ── */
+      .map-area {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+      }
+      #map {
+        width: 100%;
+        height: 100%;
+      }
 
-/* ── MAP OVERLAYS ── */
-.status-badge{
-  position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
-  z-index:700;pointer-events:none;
-  display:flex;align-items:center;gap:9px;
-  padding:10px 24px;border-radius:30px;
-  font-weight:700;font-size:14px;letter-spacing:.04em;text-transform:uppercase;
-  box-shadow:0 4px 24px rgba(0,0,0,.5);transition:all .4s ease;white-space:nowrap;
-}
-.status-badge.wait{background:rgba(255,171,0,.1);border:1.5px solid var(--amber);color:var(--amber)}
-.status-badge.inside{background:rgba(0,230,118,.1);border:1.5px solid var(--green);color:var(--green)}
-.status-badge.outside{background:rgba(255,61,90,.1);border:1.5px solid var(--red);color:var(--red)}
-.sb-dot{width:8px;height:8px;border-radius:50%;background:currentColor}
-.sb-dot.pulse{animation:sbp 1.2s ease-in-out infinite}
-@keyframes sbp{0%,100%{opacity:1}50%{opacity:.25}}
+      /* ── MAP OVERLAYS ── */
+      .status-badge {
+        position: absolute;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 700;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px 24px;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 14px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+        transition: all 0.4s ease;
+        white-space: nowrap;
+      }
+      .status-badge.wait {
+        background: rgba(255, 171, 0, 0.1);
+        border: 1.5px solid var(--amber);
+        color: var(--amber);
+      }
+      .status-badge.inside {
+        background: rgba(0, 230, 118, 0.1);
+        border: 1.5px solid var(--green);
+        color: var(--green);
+      }
+      .status-badge.outside {
+        background: rgba(255, 61, 90, 0.1);
+        border: 1.5px solid var(--red);
+        color: var(--red);
+      }
+      .sb-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+      .sb-dot.pulse {
+        animation: sbp 1.2s ease-in-out infinite;
+      }
+      @keyframes sbp {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.25;
+        }
+      }
 
-.info-card{
-  position:absolute;top:12px;right:12px;z-index:700;
-  background:var(--s1);border:1px solid var(--border2);
-  border-radius:var(--r);width:205px;
-  box-shadow:0 8px 32px rgba(0,0,0,.5);overflow:hidden;
-}
-.ic-hdr{padding:7px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:8px;color:var(--sub);text-transform:uppercase;letter-spacing:.14em}
-.ic-row{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;border-bottom:1px solid var(--border);font-family:var(--mono)}
-.ic-row:last-child{border:none}
-.ic-lbl{font-size:8px;color:var(--sub)}
-.ic-val{font-size:11px;font-weight:600}
-.ic-val.g{color:var(--green)}.ic-val.r{color:var(--red)}.ic-val.a{color:var(--amber)}.ic-val.b{color:var(--blue)}.ic-val.m{color:var(--sub)}
+      .info-card {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        z-index: 700;
+        background: var(--s1);
+        border: 1px solid var(--border2);
+        border-radius: var(--r);
+        width: 205px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+      }
+      .ic-hdr {
+        padding: 7px 12px;
+        border-bottom: 1px solid var(--border);
+        font-family: var(--mono);
+        font-size: 8px;
+        color: var(--sub);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+      .ic-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 12px;
+        border-bottom: 1px solid var(--border);
+        font-family: var(--mono);
+      }
+      .ic-row:last-child {
+        border: none;
+      }
+      .ic-lbl {
+        font-size: 8px;
+        color: var(--sub);
+      }
+      .ic-val {
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .ic-val.g {
+        color: var(--green);
+      }
+      .ic-val.r {
+        color: var(--red);
+      }
+      .ic-val.a {
+        color: var(--amber);
+      }
+      .ic-val.b {
+        color: var(--blue);
+      }
+      .ic-val.m {
+        color: var(--sub);
+      }
 
-.sync-btn{
-  position:absolute;top:12px;left:12px;z-index:700;
-  background:var(--s1);border:1px solid var(--border2);color:var(--sub);
-  font-family:var(--mono);font-size:9px;padding:7px 12px;
-  border-radius:6px;cursor:pointer;transition:all .15s;text-transform:uppercase;
-}
-.sync-btn:hover{border-color:var(--amber);color:var(--amber)}
+      .sync-btn {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 700;
+        background: var(--s1);
+        border: 1px solid var(--border2);
+        color: var(--sub);
+        font-family: var(--mono);
+        font-size: 9px;
+        padding: 7px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-transform: uppercase;
+      }
+      .sync-btn:hover {
+        border-color: var(--amber);
+        color: var(--amber);
+      }
 
-.recenter-btn{
-  position:absolute;bottom:28px;right:12px;z-index:700;
-  background:var(--s1);border:1px solid var(--border2);color:var(--sub);
-  font-family:var(--mono);font-size:10px;padding:8px 13px;
-  border-radius:6px;cursor:pointer;transition:all .15s;
-}
-.recenter-btn:hover{border-color:var(--blue);color:var(--blue)}
+      .recenter-btn {
+        position: absolute;
+        bottom: 28px;
+        right: 12px;
+        z-index: 700;
+        background: var(--s1);
+        border: 1px solid var(--border2);
+        color: var(--sub);
+        font-family: var(--mono);
+        font-size: 10px;
+        padding: 8px 13px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .recenter-btn:hover {
+        border-color: var(--blue);
+        color: var(--blue);
+      }
 
-/* ── TOAST ── */
-.toasts{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:900;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:6px}
-.toast{padding:8px 20px;border-radius:20px;font-family:var(--mono);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;animation:tin .3s ease-out,tout .4s ease-in 2.6s forwards}
-.toast.en{background:rgba(0,230,118,.18);border:1px solid var(--green);color:var(--green)}
-.toast.ex{background:rgba(255,61,90,.18);border:1px solid var(--red);color:var(--red)}
-@keyframes tin{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes tout{to{opacity:0;transform:translateY(-6px)}}
+      /* ── TOAST ── */
+      .toasts {
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 900;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+      }
+      .toast {
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        white-space: nowrap;
+        animation:
+          tin 0.3s ease-out,
+          tout 0.4s ease-in 2.6s forwards;
+      }
+      .toast.en {
+        background: rgba(0, 230, 118, 0.18);
+        border: 1px solid var(--green);
+        color: var(--green);
+      }
+      .toast.ex {
+        background: rgba(255, 61, 90, 0.18);
+        border: 1px solid var(--red);
+        color: var(--red);
+      }
+      @keyframes tin {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes tout {
+        to {
+          opacity: 0;
+          transform: translateY(-6px);
+        }
+      }
 
-/* ── MARKER STYLES ── */
-.um-dot{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(0,0,0,.8);transition:all .4s}
-.um-dot.in{background:var(--green);box-shadow:0 0 0 5px rgba(0,230,118,.18),0 0 20px rgba(0,230,118,.5)}
-.um-dot.out{background:var(--red);box-shadow:0 0 0 5px rgba(255,61,90,.18),0 0 18px rgba(255,61,90,.5)}
-.center-pin{width:14px;height:14px;border-radius:50%;background:var(--amber);border:2.5px solid rgba(0,0,0,.8);box-shadow:0 0 14px rgba(255,171,0,.8)}
+      /* ── MARKER STYLES ── */
+      .um-dot {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2.5px solid rgba(0, 0, 0, 0.8);
+        transition: all 0.4s;
+      }
+      .um-dot.in {
+        background: var(--green);
+        box-shadow:
+          0 0 0 5px rgba(0, 230, 118, 0.18),
+          0 0 20px rgba(0, 230, 118, 0.5);
+      }
+      .um-dot.out {
+        background: var(--red);
+        box-shadow:
+          0 0 0 5px rgba(255, 61, 90, 0.18),
+          0 0 18px rgba(255, 61, 90, 0.5);
+      }
+      .center-pin {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--amber);
+        border: 2.5px solid rgba(0, 0, 0, 0.8);
+        box-shadow: 0 0 14px rgba(255, 171, 0, 0.8);
+      }
 
-/* ── API bar ── */
-.api-bar{position:absolute;bottom:70px;left:12px;z-index:700;display:flex;gap:6px}
-.api-inp{background:var(--s1);border:1px solid var(--border2);border-radius:5px;padding:5px 9px;font-family:var(--mono);font-size:9px;color:var(--text);outline:none;width:175px}
-.api-inp:focus{border-color:var(--cyan,#40c4ff)}
-.api-apply{background:var(--s2);border:1px solid var(--border2);color:var(--sub);font-family:var(--mono);font-size:8px;text-transform:uppercase;padding:5px 9px;border-radius:5px;cursor:pointer}
-.api-apply:hover{border-color:var(--green);color:var(--green)}
+      /* ── API bar ── */
+      .api-bar {
+        position: absolute;
+        bottom: 70px;
+        left: 12px;
+        z-index: 700;
+        display: flex;
+        gap: 6px;
+      }
+      .api-inp {
+        background: var(--s1);
+        border: 1px solid var(--border2);
+        border-radius: 5px;
+        padding: 5px 9px;
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--text);
+        outline: none;
+        width: 175px;
+      }
+      .api-inp:focus {
+        border-color: var(--cyan, #40c4ff);
+      }
+      .api-apply {
+        background: var(--s2);
+        border: 1px solid var(--border2);
+        color: var(--sub);
+        font-family: var(--mono);
+        font-size: 8px;
+        text-transform: uppercase;
+        padding: 5px 9px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .api-apply:hover {
+        border-color: var(--green);
+        color: var(--green);
+      }
 
-@media(max-width:480px){
-  .info-card{width:170px}
-  .topbar-pills .tpill:last-child{display:none}
-  .user-chip-name{max-width:70px}
-}
-</style>
-</head>
-<body>
-<div id="root"></div>
+      @media (max-width: 480px) {
+        .info-card {
+          width: 170px;
+        }
+        .topbar-pills .tpill:last-child {
+          display: none;
+        }
+        .user-chip-name {
+          max-width: 70px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<script type="text/babel">
-const { useState, useEffect, useRef, useCallback } = React;
+    <script type="text/babel">
+      const { useState, useEffect, useRef, useCallback } = React;
 
-/* ── Haversine ── */
-function haversine(la1,lo1,la2,lo2){
-  const R=6371000,r=Math.PI/180,dl=(la2-la1)*r,dn=(lo2-lo1)*r;
-  const a=Math.sin(dl/2)**2+Math.cos(la1*r)*Math.cos(la2*r)*Math.sin(dn/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
-function fmtDist(d){ return d>=1000?(d/1000).toFixed(2)+' km':Math.round(d)+' m'; }
-function fmtTime(){ return new Date().toTimeString().slice(0,8); }
-function initials(n){ return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
-function avatarColor(n){ const h=['#00e676','#40c4ff','#b388ff','#ffab00','#ff6d00','#f48fb1']; return h[n.charCodeAt(0)%h.length]; }
+      /* ── Haversine ── */
+      function haversine(la1, lo1, la2, lo2) {
+        const R = 6371000,
+          r = Math.PI / 180,
+          dl = (la2 - la1) * r,
+          dn = (lo2 - lo1) * r;
+        const a =
+          Math.sin(dl / 2) ** 2 +
+          Math.cos(la1 * r) * Math.cos(la2 * r) * Math.sin(dn / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      }
+      function fmtDist(d) {
+        return d >= 1000 ? (d / 1000).toFixed(2) + " km" : Math.round(d) + " m";
+      }
+      function fmtTime() {
+        return new Date().toTimeString().slice(0, 8);
+      }
+      function initials(n) {
+        return n
+          .split(" ")
+          .map((w) => w[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2);
+      }
+      function avatarColor(n) {
+        const h = [
+          "#00e676",
+          "#40c4ff",
+          "#b388ff",
+          "#ffab00",
+          "#ff6d00",
+          "#f48fb1",
+        ];
+        return h[n.charCodeAt(0) % h.length];
+      }
 
-/* ── API helper ── */
-async function apiFetch(base, path, opts={}){
-  const r = await fetch(base+path,{headers:{'Content-Type':'application/json'},...opts,body:opts.body?JSON.stringify(opts.body):undefined});
-  if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.error||r.statusText); }
-  return r.json();
-}
+      /* ── API helper ── */
+      async function apiFetch(base, path, opts = {}) {
+        const r = await fetch(base + path, {
+          headers: { "Content-Type": "application/json" },
+          ...opts,
+          body: opts.body ? JSON.stringify(opts.body) : undefined,
+        });
+        if (!r.ok) {
+          const e = await r.json().catch(() => ({}));
+          throw new Error(e.error || r.statusText);
+        }
+        return r.json();
+      }
 
-/* ══════════════════════════════════════════════════════════
+      /* ══════════════════════════════════════════════════════════
    REGISTRATION SCREEN
 ══════════════════════════════════════════════════════════ */
-function RegScreen({ apiBase, onDone }){
-  const [name,setName]   = useState('');
-  const [email,setEmail] = useState('');
-  const [zone,setZone]   = useState(null);
-  const [loading,setLoading] = useState(false);
-  const [err,setErr]     = useState('');
-  const [step,setStep]   = useState('form'); // form | gps
+      function RegScreen({ apiBase, onDone }) {
+        const [name, setName] = useState("");
+        const [email, setEmail] = useState("");
+        const [zone, setZone] = useState(null);
+        const [loading, setLoading] = useState(false);
+        const [err, setErr] = useState("");
+        const [step, setStep] = useState("form"); // form | gps
 
-  useEffect(()=>{
-    apiFetch(apiBase,'/api/zones/active/primary')
-      .then(setZone).catch(()=>{});
-  },[apiBase]);
+        useEffect(() => {
+          apiFetch(apiBase, "/api/zones/active/primary")
+            .then(setZone)
+            .catch(() => {});
+        }, [apiBase]);
 
-  async function handleSubmit(){
-    if(!name.trim()) return setErr('Please enter your name.');
-    if(!email.trim()||!email.includes('@')) return setErr('Enter a valid email address.');
-    if(!zone) return setErr('No active zone found on server. Ask admin.');
-    setErr(''); setLoading(true); setStep('gps');
+        async function handleSubmit() {
+          if (!name.trim()) return setErr("Please enter your name.");
+          if (!email.trim() || !email.includes("@"))
+            return setErr("Enter a valid email address.");
+          if (!zone)
+            return setErr("No active zone found on server. Ask admin.");
+          setErr("");
+          setLoading(true);
+          setStep("gps");
 
-    if(!navigator.geolocation){ setErr('Geolocation not supported.'); setLoading(false); setStep('form'); return; }
+          if (!navigator.geolocation) {
+            setErr("Geolocation not supported.");
+            setLoading(false);
+            setStep("form");
+            return;
+          }
 
-    navigator.geolocation.getCurrentPosition(async pos=>{
-      try {
-        const sessionId = 'sess_'+Math.random().toString(36).slice(2,10);
-        const user = await apiFetch(apiBase,'/api/users/register',{
-          method:'POST',body:{name:name.trim(),email:email.trim().toLowerCase(),sessionId}
-        });
-        onDone({ user, zone, sessionId });
-      } catch(e){ setErr(e.message); setStep('form'); setLoading(false); }
-    }, e=>{
-      const msgs={1:'Permission denied — please allow location.',2:'GPS unavailable.',3:'GPS timed out.'};
-      setErr(msgs[e.code]||e.message); setStep('form'); setLoading(false);
-    },{ enableHighAccuracy:true, timeout:15000, maximumAge:0 });
-  }
+          navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+              try {
+                const sessionId =
+                  "sess_" + Math.random().toString(36).slice(2, 10);
+                const user = await apiFetch(apiBase, "/api/users/register", {
+                  method: "POST",
+                  body: {
+                    name: name.trim(),
+                    email: email.trim().toLowerCase(),
+                    sessionId,
+                  },
+                });
+                onDone({ user, zone, sessionId });
+              } catch (e) {
+                setErr(e.message);
+                setStep("form");
+                setLoading(false);
+              }
+            },
+            (e) => {
+              const msgs = {
+                1: "Permission denied — please allow location.",
+                2: "GPS unavailable.",
+                3: "GPS timed out.",
+              };
+              setErr(msgs[e.code] || e.message);
+              setStep("form");
+              setLoading(false);
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+          );
+        }
 
-  return (
-    <div className="reg-overlay">
-      <div className="reg-card">
-        <div className="reg-hero">
-          <div className="reg-icon">📍</div>
-          <div className="reg-title">Geofence Tracker</div>
-          <div className="reg-sub">Real-time zone monitoring</div>
-          {zone && (
-            <div className="reg-zone-pill">
-              <div className="reg-zone-dot"/>
-              {zone.name} · {fmtDist(zone.radius)} radius
+        return (
+          <div className="reg-overlay">
+            <div className="reg-card">
+              <div className="reg-hero">
+                <div className="reg-icon">📍</div>
+                <div className="reg-title">Geofence Tracker</div>
+                <div className="reg-sub">Real-time zone monitoring</div>
+                {zone && (
+                  <div className="reg-zone-pill">
+                    <div className="reg-zone-dot" />
+                    {zone.name} · {fmtDist(zone.radius)} radius
+                  </div>
+                )}
+              </div>
+
+              <div className="reg-body">
+                {zone && (
+                  <div className="reg-info" style={{ marginBottom: 16 }}>
+                    <div className="reg-info-row">
+                      <span className="reg-info-lbl">Zone center</span>
+                      <span
+                        className="reg-info-val"
+                        style={{ color: "var(--amber)" }}
+                      >
+                        {zone.lat.toFixed(4)}, {zone.lng.toFixed(4)}
+                      </span>
+                    </div>
+                    <div className="reg-info-row">
+                      <span className="reg-info-lbl">Radius</span>
+                      <span
+                        className="reg-info-val"
+                        style={{ color: "var(--green)" }}
+                      >
+                        {fmtDist(zone.radius)}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {step === "gps" ? (
+                  <div style={{ textAlign: "center", padding: "20px 0" }}>
+                    <div
+                      style={{
+                        fontSize: 36,
+                        marginBottom: 12,
+                        animation: "bob 1.5s ease-in-out infinite",
+                      }}
+                    >
+                      🛰
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "var(--mono)",
+                        fontSize: 11,
+                        color: "var(--sub)",
+                      }}
+                    >
+                      Requesting location permission…
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "var(--mono)",
+                        fontSize: 9,
+                        color: "var(--muted)",
+                        marginTop: 8,
+                      }}
+                    >
+                      Click <strong>Allow</strong> in the browser prompt
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="field">
+                      <label>Your Name</label>
+                      <input
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="John Doe"
+                        onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                      />
+                    </div>
+                    <div className="field">
+                      <label>Email Address</label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="john@example.com"
+                        onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                      />
+                    </div>
+                    <button
+                      className="reg-btn"
+                      onClick={handleSubmit}
+                      disabled={loading || !zone}
+                    >
+                      {loading
+                        ? "Connecting…"
+                        : zone
+                          ? "Allow Location & Track Me"
+                          : "Waiting for zone…"}
+                    </button>
+                    {err && <div className="reg-err">⚠ {err}</div>}
+                    <div className="reg-note">
+                      You'll receive email alerts when entering
+                      <br />
+                      or leaving the geofence zone.
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        );
+      }
 
-        <div className="reg-body">
-          {zone && (
-            <div className="reg-info" style={{marginBottom:16}}>
-              <div className="reg-info-row">
-                <span className="reg-info-lbl">Zone center</span>
-                <span className="reg-info-val" style={{color:'var(--amber)'}}>{zone.lat.toFixed(4)}, {zone.lng.toFixed(4)}</span>
-              </div>
-              <div className="reg-info-row">
-                <span className="reg-info-lbl">Radius</span>
-                <span className="reg-info-val" style={{color:'var(--green)'}}>{fmtDist(zone.radius)}</span>
-              </div>
-            </div>
-          )}
-
-          {step === 'gps' ? (
-            <div style={{textAlign:'center',padding:'20px 0'}}>
-              <div style={{fontSize:36,marginBottom:12,animation:'bob 1.5s ease-in-out infinite'}}>🛰</div>
-              <div style={{fontFamily:'var(--mono)',fontSize:11,color:'var(--sub)'}}>Requesting location permission…</div>
-              <div style={{fontFamily:'var(--mono)',fontSize:9,color:'var(--muted)',marginTop:8}}>Click <strong>Allow</strong> in the browser prompt</div>
-            </div>
-          ) : (
-            <>
-              <div className="field">
-                <label>Your Name</label>
-                <input value={name} onChange={e=>setName(e.target.value)} placeholder="John Doe" onKeyDown={e=>e.key==='Enter'&&handleSubmit()}/>
-              </div>
-              <div className="field">
-                <label>Email Address</label>
-                <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="john@example.com" onKeyDown={e=>e.key==='Enter'&&handleSubmit()}/>
-              </div>
-              <button className="reg-btn" onClick={handleSubmit} disabled={loading||!zone}>
-                {loading ? 'Connecting…' : zone ? 'Allow Location & Track Me' : 'Waiting for zone…'}
-              </button>
-              {err && <div className="reg-err">⚠ {err}</div>}
-              <div className="reg-note">
-                You'll receive email alerts when entering<br/>or leaving the geofence zone.
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════
+      /* ══════════════════════════════════════════════════════════
    MAIN TRACKER
 ══════════════════════════════════════════════════════════ */
-function Tracker({ apiBase, session }){
-  const { user, zone } = session;
-  const mapRef    = useRef(null);
-  const leafletRef= useRef(null);
-  const circleRef = useRef(null);
-  const markerRef = useRef(null);
-  const accRef    = useRef(null);
-  const trailRef  = useRef(null);
-  const trailPts  = useRef([]);
-  const watchRef  = useRef(null);
+      function Tracker({ apiBase, session }) {
+        const { user, zone } = session;
+        const mapRef = useRef(null);
+        const leafletRef = useRef(null);
+        const circleRef = useRef(null);
+        const markerRef = useRef(null);
+        const accRef = useRef(null);
+        const trailRef = useRef(null);
+        const trailPts = useRef([]);
+        const watchRef = useRef(null);
 
-  const [pos,setPos]         = useState(null);
-  const [dist,setDist]       = useState(null);
-  const [inside,setInside]   = useState(null);
-  const [prevInside,setPrev] = useState(null);
-  const [accuracy,setAcc]    = useState(null);
-  const [time,setTime]       = useState('—');
-  const [gpsOn,setGpsOn]     = useState(false);
-  const [gpsErr,setGpsErr]   = useState(false);
-  const [toasts,setToasts]   = useState([]);
-  const [activeZone,setActiveZone] = useState(zone);
-  const wasInsideRef = useRef(null);
+        const [pos, setPos] = useState(null);
+        const [dist, setDist] = useState(null);
+        const [inside, setInside] = useState(null);
+        const [prevInside, setPrev] = useState(null);
+        const [accuracy, setAcc] = useState(null);
+        const [time, setTime] = useState("—");
+        const [gpsOn, setGpsOn] = useState(false);
+        const [gpsErr, setGpsErr] = useState(false);
+        const [toasts, setToasts] = useState([]);
+        const [activeZone, setActiveZone] = useState(zone);
+        const wasInsideRef = useRef(null);
 
-  /* Init map */
-  useEffect(()=>{
-    const L = window.L;
-    const map = L.map(mapRef.current,{zoomControl:true,attributionControl:false,tap:true})
-      .setView([zone.lat,zone.lng],14);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
-    leafletRef.current = map;
+        /* Init map */
+        useEffect(() => {
+          const L = window.L;
+          const map = L.map(mapRef.current, {
+            zoomControl: true,
+            attributionControl: false,
+            tap: true,
+          }).setView([zone.lat, zone.lng], 14);
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+          }).addTo(map);
+          leafletRef.current = map;
 
-    // Center marker
-    const cIcon = L.divIcon({className:'',iconSize:[14,14],iconAnchor:[7,7],html:'<div class="center-pin"></div>'});
-    L.marker([zone.lat,zone.lng],{icon:cIcon,zIndexOffset:100})
-      .bindTooltip(`<span style="font-family:JetBrains Mono,monospace;font-size:10px">${zone.name}<br>Center</span>`,{direction:'top'})
-      .addTo(map);
+          // Center marker
+          const cIcon = L.divIcon({
+            className: "",
+            iconSize: [14, 14],
+            iconAnchor: [7, 7],
+            html: '<div class="center-pin"></div>',
+          });
+          L.marker([zone.lat, zone.lng], { icon: cIcon, zIndexOffset: 100 })
+            .bindTooltip(
+              `<span style="font-family:JetBrains Mono,monospace;font-size:10px">${zone.name}<br>Center</span>`,
+              { direction: "top" },
+            )
+            .addTo(map);
 
-    // Geofence circle
-    circleRef.current = L.circle([zone.lat,zone.lng],{
-      radius:zone.radius,color:'#00e676',fillColor:'#00e676',
-      fillOpacity:.05,weight:1.5,dashArray:'6 4'
-    }).addTo(map);
+          // Geofence circle
+          circleRef.current = L.circle([zone.lat, zone.lng], {
+            radius: zone.radius,
+            color: "#00e676",
+            fillColor: "#00e676",
+            fillOpacity: 0.05,
+            weight: 1.5,
+            dashArray: "6 4",
+          }).addTo(map);
 
-    // Trail
-    trailRef.current = L.polyline([],{color:'#40c4ff',weight:2,opacity:.45,dashArray:'4 3'}).addTo(map);
+          // Trail
+          trailRef.current = L.polyline([], {
+            color: "#40c4ff",
+            weight: 2,
+            opacity: 0.45,
+            dashArray: "4 3",
+          }).addTo(map);
 
-    return ()=>{ map.remove(); if(watchRef.current) navigator.geolocation.clearWatch(watchRef.current); };
-  },[]);
+          return () => {
+            map.remove();
+            if (watchRef.current)
+              navigator.geolocation.clearWatch(watchRef.current);
+          };
+        }, []);
 
-  /* Start GPS watch */
-  useEffect(()=>{
-    watchRef.current = navigator.geolocation.watchPosition(
-      pos=>handlePos(pos),
-      e=>{ setGpsErr(true); setGpsOn(false); },
-      {enableHighAccuracy:true,maximumAge:2000,timeout:20000}
-    );
-    return ()=>navigator.geolocation.clearWatch(watchRef.current);
-  },[activeZone]);
+        /* Start GPS watch */
+        useEffect(() => {
+          watchRef.current = navigator.geolocation.watchPosition(
+            (pos) => handlePos(pos),
+            (e) => {
+              setGpsErr(true);
+              setGpsOn(false);
+            },
+            { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 },
+          );
+          return () => navigator.geolocation.clearWatch(watchRef.current);
+        }, [activeZone]);
 
-  /* Sync zone every 30s */
-  useEffect(()=>{
-    const t = setInterval(async()=>{
-      try {
-        const z = await apiFetch(apiBase,'/api/zones/active/primary');
-        setActiveZone(z);
-        if(circleRef.current){ circleRef.current.setLatLng([z.lat,z.lng]); circleRef.current.setRadius(z.radius); }
-      } catch{}
-    },30000);
-    return ()=>clearInterval(t);
-  },[apiBase]);
+        /* Sync zone every 30s */
+        useEffect(() => {
+          const t = setInterval(async () => {
+            try {
+              const z = await apiFetch(apiBase, "/api/zones/active/primary");
+              setActiveZone(z);
+              if (circleRef.current) {
+                circleRef.current.setLatLng([z.lat, z.lng]);
+                circleRef.current.setRadius(z.radius);
+              }
+            } catch {}
+          }, 30000);
+          return () => clearInterval(t);
+        }, [apiBase]);
 
-  const handlePos = useCallback(async(position)=>{
-    const {latitude:lat,longitude:lng,accuracy:acc}=position.coords;
-    const L=window.L;
-    setGpsOn(true); setGpsErr(false);
-    setPos([lat,lng]); setAcc(acc); setTime(fmtTime());
+        const handlePos = useCallback(
+          async (position) => {
+            const {
+              latitude: lat,
+              longitude: lng,
+              accuracy: acc,
+            } = position.coords;
+            const L = window.L;
+            setGpsOn(true);
+            setGpsErr(false);
+            setPos([lat, lng]);
+            setAcc(acc);
+            setTime(fmtTime());
 
-    const z = activeZone;
-    const d = haversine(z.lat,z.lng,lat,lng);
-    const ins = d<=z.radius;
-    setDist(d); setInside(ins);
+            const z = activeZone;
+            const d = haversine(z.lat, z.lng, lat, lng);
+            const ins = d <= z.radius;
+            setDist(d);
+            setInside(ins);
 
-    // User marker
-    const uIcon = L.divIcon({className:'',iconSize:[18,18],iconAnchor:[9,9],
-      html:`<div class="um-dot ${ins?'in':'out'}"></div>`});
-    if(!markerRef.current){
-      markerRef.current = L.marker([lat,lng],{icon:uIcon,zIndexOffset:200})
-        .bindTooltip('',{permanent:true,direction:'top',offset:[0,-10]})
-        .addTo(leafletRef.current);
-      leafletRef.current.fitBounds(L.latLngBounds([[z.lat,z.lng],[lat,lng]]).pad(.35));
-    } else {
-      markerRef.current.setLatLng([lat,lng]);
-      markerRef.current.setIcon(uIcon);
-    }
-    markerRef.current.setTooltipContent(
-      `<span style="font-family:JetBrains Mono,monospace;font-size:10px;color:${ins?'#00e676':'#ff3d5a'}">${ins?'▲ Inside':'▼ Outside'} · ${fmtDist(d)}</span>`
-    );
+            // User marker
+            const uIcon = L.divIcon({
+              className: "",
+              iconSize: [18, 18],
+              iconAnchor: [9, 9],
+              html: `<div class="um-dot ${ins ? "in" : "out"}"></div>`,
+            });
+            if (!markerRef.current) {
+              markerRef.current = L.marker([lat, lng], {
+                icon: uIcon,
+                zIndexOffset: 200,
+              })
+                .bindTooltip("", {
+                  permanent: true,
+                  direction: "top",
+                  offset: [0, -10],
+                })
+                .addTo(leafletRef.current);
+              leafletRef.current.fitBounds(
+                L.latLngBounds([
+                  [z.lat, z.lng],
+                  [lat, lng],
+                ]).pad(0.35),
+              );
+            } else {
+              markerRef.current.setLatLng([lat, lng]);
+              markerRef.current.setIcon(uIcon);
+            }
+            markerRef.current.setTooltipContent(
+              `<span style="font-family:JetBrains Mono,monospace;font-size:10px;color:${ins ? "#00e676" : "#ff3d5a"}">${ins ? "▲ Inside" : "▼ Outside"} · ${fmtDist(d)}</span>`,
+            );
 
-    if(accRef.current){ leafletRef.current.removeLayer(accRef.current); accRef.current=null; }
-    if(acc>0){ accRef.current=L.circle([lat,lng],{radius:acc,color:'#40c4ff',fillColor:'#40c4ff',fillOpacity:.05,weight:.7,dashArray:'3 3'}).addTo(leafletRef.current); }
+            if (accRef.current) {
+              leafletRef.current.removeLayer(accRef.current);
+              accRef.current = null;
+            }
+            if (acc > 0) {
+              accRef.current = L.circle([lat, lng], {
+                radius: acc,
+                color: "#40c4ff",
+                fillColor: "#40c4ff",
+                fillOpacity: 0.05,
+                weight: 0.7,
+                dashArray: "3 3",
+              }).addTo(leafletRef.current);
+            }
 
-    trailPts.current.push([lat,lng]);
-    if(trailPts.current.length>500) trailPts.current.shift();
-    trailRef.current.setLatLngs(trailPts.current);
+            trailPts.current.push([lat, lng]);
+            if (trailPts.current.length > 500) trailPts.current.shift();
+            trailRef.current.setLatLngs(trailPts.current);
 
-    // Enter/Exit
-    if(wasInsideRef.current!==null && wasInsideRef.current!==ins){
-      const type=ins?'en':'ex';
-      const msg=ins?'▲ Entered zone!':'▼ Left zone!';
-      addToast(msg,type);
-      flashCircle(ins);
-    }
-    wasInsideRef.current=ins;
+            // Enter/Exit
+            if (wasInsideRef.current !== null && wasInsideRef.current !== ins) {
+              const type = ins ? "en" : "ex";
+              const msg = ins ? "▲ Entered zone!" : "▼ Left zone!";
+              addToast(msg, type);
+              flashCircle(ins);
+            }
+            wasInsideRef.current = ins;
 
-    // Post to backend
-    try {
-      await apiFetch(apiBase,'/api/users/location',{
-        method:'POST',body:{userId:user._id,lat,lng,accuracy:acc,zoneId:z._id,isInside:ins,distanceToCenter:d}
-      });
-    } catch{}
-  },[activeZone, apiBase, user]);
+            // Post to backend
+            try {
+              await apiFetch(apiBase, "/api/users/location", {
+                method: "POST",
+                body: {
+                  userId: user._id,
+                  lat,
+                  lng,
+                  accuracy: acc,
+                  zoneId: z._id,
+                  isInside: ins,
+                  distanceToCenter: d,
+                },
+              });
+            } catch {}
+          },
+          [activeZone, apiBase, user],
+        );
 
-  function addToast(msg,type){
-    const id=Date.now();
-    setToasts(p=>[...p,{id,msg,type}]);
-    setTimeout(()=>setToasts(p=>p.filter(t=>t.id!==id)),3200);
-  }
+        function addToast(msg, type) {
+          const id = Date.now();
+          setToasts((p) => [...p, { id, msg, type }]);
+          setTimeout(
+            () => setToasts((p) => p.filter((t) => t.id !== id)),
+            3200,
+          );
+        }
 
-  function flashCircle(ins){
-    const c=ins?'#00e676':'#ff3d5a';
-    circleRef.current?.setStyle({color:c,fillColor:c,fillOpacity:.15,weight:2.5});
-    setTimeout(()=>circleRef.current?.setStyle({color:'#00e676',fillColor:'#00e676',fillOpacity:.05,weight:1.5}),1400);
-  }
+        function flashCircle(ins) {
+          const c = ins ? "#00e676" : "#ff3d5a";
+          circleRef.current?.setStyle({
+            color: c,
+            fillColor: c,
+            fillOpacity: 0.15,
+            weight: 2.5,
+          });
+          setTimeout(
+            () =>
+              circleRef.current?.setStyle({
+                color: "#00e676",
+                fillColor: "#00e676",
+                fillOpacity: 0.05,
+                weight: 1.5,
+              }),
+            1400,
+          );
+        }
 
-  function goToMe(){ if(pos) leafletRef.current?.setView(pos,16); }
+        function goToMe() {
+          if (pos) leafletRef.current?.setView(pos, 16);
+        }
 
-  const badgeCls = inside===null?'wait':inside?'inside':'outside';
-  const badgeText= inside===null?'Acquiring GPS…':inside?`Inside zone · ${fmtDist(dist)} from center`:`Outside zone · ${fmtDist(dist)} from center`;
+        const badgeCls =
+          inside === null ? "wait" : inside ? "inside" : "outside";
+        const badgeText =
+          inside === null
+            ? "Acquiring GPS…"
+            : inside
+              ? `Inside zone · ${fmtDist(dist)} from center`
+              : `Outside zone · ${fmtDist(dist)} from center`;
 
-  return (
-    <div className="app">
-      {/* Topbar */}
-      <div className="topbar">
-        <div className="brand">
-          <div className={`live-dot ${gpsOn?'on':''}${gpsErr?' err':''}`}/>
-          <div>
-            <div className="brand-name">Geofence Tracker</div>
-            <div className="brand-sub">{gpsOn?`Live · ${time}`:gpsErr?'GPS error':'Waiting for GPS…'}</div>
-          </div>
-        </div>
-        <div className="topbar-pills">
-          <div className="tpill">
-            <div className="tpill-v" style={{color:inside===null?'var(--amber)':inside?'var(--green)':'var(--red)'}}>
-              {inside===null?'—':inside?'IN':'OUT'}
+        return (
+          <div className="app">
+            {/* Topbar */}
+            <div className="topbar">
+              <div className="brand">
+                <div
+                  className={`live-dot ${gpsOn ? "on" : ""}${gpsErr ? " err" : ""}`}
+                />
+                <div>
+                  <div className="brand-name">Geofence Tracker</div>
+                  <div className="brand-sub">
+                    {gpsOn
+                      ? `Live · ${time}`
+                      : gpsErr
+                        ? "GPS error"
+                        : "Waiting for GPS…"}
+                  </div>
+                </div>
+              </div>
+              <div className="topbar-pills">
+                <div className="tpill">
+                  <div
+                    className="tpill-v"
+                    style={{
+                      color:
+                        inside === null
+                          ? "var(--amber)"
+                          : inside
+                            ? "var(--green)"
+                            : "var(--red)",
+                    }}
+                  >
+                    {inside === null ? "—" : inside ? "IN" : "OUT"}
+                  </div>
+                  <div className="tpill-l">Status</div>
+                </div>
+                <div className="tpill">
+                  <div className="tpill-v" style={{ color: "var(--blue)" }}>
+                    {dist !== null ? fmtDist(dist) : "—"}
+                  </div>
+                  <div className="tpill-l">Distance</div>
+                </div>
+              </div>
+              <div className="user-chip">
+                <div
+                  className="user-avatar"
+                  style={{ background: avatarColor(user.name) }}
+                >
+                  {initials(user.name)}
+                </div>
+                <span className="user-chip-name">{user.name}</span>
+              </div>
             </div>
-            <div className="tpill-l">Status</div>
+
+            {/* Map */}
+            <div className="map-area">
+              <div
+                id="map"
+                ref={mapRef}
+                style={{ width: "100%", height: "100%" }}
+              />
+
+              {/* Toasts */}
+              <div className="toasts">
+                {toasts.map((t) => (
+                  <div key={t.id} className={`toast ${t.type}`}>
+                    {t.msg}
+                  </div>
+                ))}
+              </div>
+
+              {/* Sync zone btn */}
+              <button
+                className="sync-btn"
+                onClick={async () => {
+                  try {
+                    const z = await apiFetch(
+                      apiBase,
+                      "/api/zones/active/primary",
+                    );
+                    setActiveZone(z);
+                    addToast("Zone synced", "en");
+                  } catch {}
+                }}
+              >
+                ⟳ Sync Zone
+              </button>
+
+              {/* Info card */}
+              <div className="info-card">
+                <div className="ic-hdr">{activeZone.name}</div>
+                <div className="ic-row">
+                  <span className="ic-lbl">Latitude</span>
+                  <span className="ic-val b">
+                    {pos ? pos[0].toFixed(6) : "—"}
+                  </span>
+                </div>
+                <div className="ic-row">
+                  <span className="ic-lbl">Longitude</span>
+                  <span className="ic-val b">
+                    {pos ? pos[1].toFixed(6) : "—"}
+                  </span>
+                </div>
+                <div className="ic-row">
+                  <span className="ic-lbl">GPS Accuracy</span>
+                  <span className="ic-val a">
+                    {accuracy !== null
+                      ? "±" + Math.round(accuracy) + " m"
+                      : "—"}
+                  </span>
+                </div>
+                <div className="ic-row">
+                  <span className="ic-lbl">Distance</span>
+                  <span className={`ic-val ${inside ? "g" : "r"}`}>
+                    {dist !== null ? fmtDist(dist) : "—"}
+                  </span>
+                </div>
+                <div className="ic-row">
+                  <span className="ic-lbl">Zone radius</span>
+                  <span className="ic-val g">{fmtDist(activeZone.radius)}</span>
+                </div>
+                <div className="ic-row">
+                  <span className="ic-lbl">Updated</span>
+                  <span className="ic-val m">{time}</span>
+                </div>
+              </div>
+
+              {/* Status badge */}
+              <div className={`status-badge ${badgeCls}`}>
+                <div className={`sb-dot ${inside === null ? "pulse" : ""}`} />
+                {badgeText}
+              </div>
+
+              {/* Recenter */}
+              <button className="recenter-btn" onClick={goToMe}>
+                ⊙ Me
+              </button>
+            </div>
           </div>
-          <div className="tpill">
-            <div className="tpill-v" style={{color:'var(--blue)'}}>{dist!==null?fmtDist(dist):'—'}</div>
-            <div className="tpill-l">Distance</div>
-          </div>
-        </div>
-        <div className="user-chip">
-          <div className="user-avatar" style={{background:avatarColor(user.name)}}>{initials(user.name)}</div>
-          <span className="user-chip-name">{user.name}</span>
-        </div>
-      </div>
+        );
+      }
 
-      {/* Map */}
-      <div className="map-area">
-        <div id="map" ref={mapRef} style={{width:'100%',height:'100%'}}/>
-
-        {/* Toasts */}
-        <div className="toasts">
-          {toasts.map(t=><div key={t.id} className={`toast ${t.type}`}>{t.msg}</div>)}
-        </div>
-
-        {/* Sync zone btn */}
-        <button className="sync-btn" onClick={async()=>{
-          try { const z=await apiFetch(apiBase,'/api/zones/active/primary'); setActiveZone(z); addToast('Zone synced','en'); } catch{}
-        }}>⟳ Sync Zone</button>
-
-        {/* Info card */}
-        <div className="info-card">
-          <div className="ic-hdr">{activeZone.name}</div>
-          <div className="ic-row"><span className="ic-lbl">Latitude</span><span className="ic-val b">{pos?pos[0].toFixed(6):'—'}</span></div>
-          <div className="ic-row"><span className="ic-lbl">Longitude</span><span className="ic-val b">{pos?pos[1].toFixed(6):'—'}</span></div>
-          <div className="ic-row"><span className="ic-lbl">GPS Accuracy</span><span className="ic-val a">{accuracy!==null?'±'+Math.round(accuracy)+' m':'—'}</span></div>
-          <div className="ic-row">
-            <span className="ic-lbl">Distance</span>
-            <span className={`ic-val ${inside?'g':'r'}`}>{dist!==null?fmtDist(dist):'—'}</span>
-          </div>
-          <div className="ic-row"><span className="ic-lbl">Zone radius</span><span className="ic-val g">{fmtDist(activeZone.radius)}</span></div>
-          <div className="ic-row"><span className="ic-lbl">Updated</span><span className="ic-val m">{time}</span></div>
-        </div>
-
-        {/* Status badge */}
-        <div className={`status-badge ${badgeCls}`}>
-          <div className={`sb-dot ${inside===null?'pulse':''}`}/>
-          {badgeText}
-        </div>
-
-        {/* Recenter */}
-        <button className="recenter-btn" onClick={goToMe}>⊙ Me</button>
-      </div>
-    </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════
+      /* ══════════════════════════════════════════════════════════
    APP ROOT
 ══════════════════════════════════════════════════════════ */
-function App(){
-  const [apiBase,setApiBase] = useState('http://localhost:3000');
-  const [session,setSession] = useState(null);
+      function App() {
+        const [apiBase, setApiBase] = useState(
+          "https://radius-based-geolocation-tracking.onrender.com/",
+        );
+        const [session, setSession] = useState(null);
 
-  return session
-    ? <Tracker apiBase={apiBase} session={session}/>
-    : <RegScreen apiBase={apiBase} onDone={setSession}/>;
-}
+        return session ? (
+          <Tracker apiBase={apiBase} session={session} />
+        ) : (
+          <RegScreen apiBase={apiBase} onDone={setSession} />
+        );
+      }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
-</script>
-</body>
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+  </body>
 </html>
