@@ -19,6 +19,7 @@ const path = require("path");
 const dotenv = require("dotenv");
 const envPath = path.join(__dirname, ".env");
 const envResult = dotenv.config({ path: envPath });
+dotenv.config({ path: envPath }); // correct
 dotenv.config();
 
 // Startup diagnostics
