@@ -34,7 +34,6 @@
         --red: #ff3d5a;
         --amber: #ffab00;
         --blue: #40c4ff;
-        --purple: #b388ff;
         --text: #cdd2e8;
         --sub: #8892b0;
         --muted: #3d4460;
@@ -53,8 +52,6 @@
         background: var(--bg);
         color: var(--text);
       }
-
-      /* ── MAP ── */
       .leaflet-container {
         background: #040609 !important;
       }
@@ -70,7 +67,7 @@
         display: none !important;
       }
 
-      /* ── REGISTRATION OVERLAY ── */
+      /* REGISTRATION */
       .reg-overlay {
         position: fixed;
         inset: 0;
@@ -90,7 +87,6 @@
           opacity: 1;
         }
       }
-
       .reg-card {
         background: var(--s1);
         border: 1px solid var(--border2);
@@ -111,7 +107,6 @@
           transform: translateY(0);
         }
       }
-
       .reg-hero {
         background: linear-gradient(
           135deg,
@@ -161,7 +156,6 @@
         color: var(--sub);
         position: relative;
       }
-
       .reg-zone-pill {
         display: inline-flex;
         align-items: center;
@@ -195,11 +189,9 @@
           box-shadow: 0 0 0 0 rgba(0, 230, 118, 0);
         }
       }
-
       .reg-body {
         padding: 26px 26px 28px;
       }
-
       .field {
         margin-bottom: 16px;
       }
@@ -233,7 +225,6 @@
       .field input::placeholder {
         color: var(--muted);
       }
-
       .reg-info {
         background: var(--s2);
         border: 1px solid var(--border);
@@ -258,7 +249,6 @@
         font-size: 11px;
         font-weight: 600;
       }
-
       .reg-btn {
         width: 100%;
         padding: 13px;
@@ -278,17 +268,11 @@
         box-shadow: 0 8px 24px rgba(0, 230, 118, 0.3);
         transform: translateY(-1px);
       }
-      .reg-btn:active {
-        transform: translateY(0);
-      }
       .reg-btn:disabled {
         background: var(--s3);
         color: var(--muted);
         cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
       }
-
       .reg-err {
         color: var(--red);
         font-family: var(--mono);
@@ -309,14 +293,12 @@
         line-height: 1.7;
       }
 
-      /* ── MAIN APP LAYOUT ── */
+      /* LAYOUT */
       .app {
         display: flex;
         flex-direction: column;
         height: 100%;
       }
-
-      /* ── TOPBAR ── */
       .topbar {
         height: 54px;
         flex-shrink: 0;
@@ -425,8 +407,6 @@
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-
-      /* ── MAP AREA ── */
       .map-area {
         flex: 1;
         position: relative;
@@ -437,7 +417,7 @@
         height: 100%;
       }
 
-      /* ── MAP OVERLAYS ── */
+      /* STATUS BADGE */
       .status-badge {
         position: absolute;
         bottom: 28px;
@@ -492,6 +472,7 @@
         }
       }
 
+      /* INFO CARD */
       .info-card {
         position: absolute;
         top: 12px;
@@ -548,6 +529,7 @@
         color: var(--sub);
       }
 
+      /* BUTTONS */
       .sync-btn {
         position: absolute;
         top: 12px;
@@ -568,7 +550,6 @@
         border-color: var(--amber);
         color: var(--amber);
       }
-
       .recenter-btn {
         position: absolute;
         bottom: 28px;
@@ -589,7 +570,256 @@
         color: var(--blue);
       }
 
-      /* ── TOAST ── */
+      /* CHECK-IN BUTTON */
+      .checkin-btn {
+        position: absolute;
+        bottom: 72px;
+        right: 12px;
+        z-index: 700;
+        background: linear-gradient(135deg, #0a5c2a, #0d7a38);
+        border: 2px solid var(--green);
+        color: #fff;
+        font-family: var(--mono);
+        font-size: 10px;
+        font-weight: 700;
+        padding: 9px 13px;
+        border-radius: 6px;
+        cursor: pointer;
+        letter-spacing: 0.5px;
+        box-shadow: 0 0 14px rgba(0, 230, 118, 0.35);
+        transition: all 0.15s;
+      }
+      .checkin-btn:hover {
+        background: linear-gradient(135deg, #0d7a38, #10963f);
+        transform: scale(1.04);
+        box-shadow: 0 0 22px rgba(0, 230, 118, 0.55);
+      }
+      .checkin-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* CHECK-IN MODAL */
+      .ci-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        animation: fadeIn 0.2s ease;
+      }
+      .ci-modal {
+        background: var(--s1);
+        border: 1px solid var(--border2);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 360px;
+        overflow: hidden;
+        box-shadow: 0 12px 50px rgba(0, 0, 0, 0.7);
+      }
+      .ci-modal-hdr {
+        background: linear-gradient(135deg, #0a2a15, #0d3b1e);
+        padding: 18px 22px 14px;
+        border-bottom: 1px solid var(--border);
+      }
+      .ci-modal-hdr h2 {
+        margin: 0 0 4px;
+        color: var(--green);
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .ci-modal-hdr p {
+        color: var(--sub);
+        font-size: 11px;
+        margin: 0;
+        font-family: var(--mono);
+      }
+      .ci-modal-body {
+        padding: 16px 18px 18px;
+      }
+      .ci-loc-bar {
+        background: var(--s2);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px 12px;
+        margin-bottom: 12px;
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--sub);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .ci-loc-bar span {
+        color: var(--blue);
+      }
+
+      /* Camera preview area */
+      .ci-cam-zone {
+        border: 2px dashed var(--border2);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: border-color 0.15s;
+        min-height: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--s2);
+        position: relative;
+      }
+      .ci-cam-zone:hover {
+        border-color: var(--green);
+      }
+      .ci-cam-zone img {
+        width: 100%;
+        max-height: 220px;
+        object-fit: cover;
+        display: block;
+      }
+      .ci-cam-placeholder {
+        text-align: center;
+        padding: 24px;
+        pointer-events: none;
+      }
+      .ci-cam-placeholder .ci-cam-icon {
+        font-size: 36px;
+        margin-bottom: 8px;
+      }
+      .ci-cam-placeholder p {
+        font-size: 12px;
+        color: var(--sub);
+        margin: 0 0 4px;
+      }
+      .ci-cam-placeholder small {
+        font-size: 10px;
+        color: var(--muted);
+        font-family: var(--mono);
+      }
+
+      /* Upload progress overlay */
+      .ci-progress-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(6, 9, 17, 0.85);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+      .ci-progress-bar-wrap {
+        width: 80%;
+        height: 4px;
+        background: var(--border2);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .ci-progress-bar {
+        height: 100%;
+        background: var(--green);
+        transition: width 0.3s ease;
+        border-radius: 4px;
+      }
+      .ci-progress-text {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--green);
+      }
+
+      .ci-retake {
+        display: block;
+        width: 100%;
+        background: transparent;
+        border: 1px solid var(--border2);
+        color: var(--sub);
+        font-family: var(--mono);
+        font-size: 9px;
+        text-transform: uppercase;
+        padding: 6px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-bottom: 10px;
+        transition: all 0.15s;
+        letter-spacing: 0.08em;
+      }
+      .ci-retake:hover {
+        border-color: var(--amber);
+        color: var(--amber);
+      }
+      .ci-note {
+        width: 100%;
+        background: var(--s2);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text);
+        font-size: 12px;
+        padding: 9px 12px;
+        margin-bottom: 14px;
+        resize: none;
+        font-family: var(--sans);
+        box-sizing: border-box;
+        outline: none;
+        transition: border 0.15s;
+      }
+      .ci-note:focus {
+        border-color: var(--green);
+      }
+      .ci-note::placeholder {
+        color: var(--muted);
+      }
+      .ci-actions {
+        display: flex;
+        gap: 10px;
+      }
+      .ci-cancel {
+        flex: 1;
+        background: transparent;
+        border: 1px solid var(--border2);
+        color: var(--sub);
+        font-size: 12px;
+        padding: 11px;
+        border-radius: 7px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .ci-cancel:hover {
+        border-color: var(--muted);
+        color: var(--text);
+      }
+      .ci-submit {
+        flex: 2;
+        background: var(--green);
+        border: none;
+        color: #050d07;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 11px;
+        border-radius: 7px;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .ci-submit:hover:not(:disabled) {
+        background: #33ee88;
+        box-shadow: 0 4px 16px rgba(0, 230, 118, 0.3);
+      }
+      .ci-submit:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      /* TOASTS */
       .toasts {
         position: absolute;
         top: 12px;
@@ -642,7 +872,7 @@
         }
       }
 
-      /* ── MARKER STYLES ── */
+      /* MARKERS */
       .um-dot {
         width: 18px;
         height: 18px;
@@ -671,45 +901,6 @@
         box-shadow: 0 0 14px rgba(255, 171, 0, 0.8);
       }
 
-      /* ── API bar ── */
-      .api-bar {
-        position: absolute;
-        bottom: 70px;
-        left: 12px;
-        z-index: 700;
-        display: flex;
-        gap: 6px;
-      }
-      .api-inp {
-        background: var(--s1);
-        border: 1px solid var(--border2);
-        border-radius: 5px;
-        padding: 5px 9px;
-        font-family: var(--mono);
-        font-size: 9px;
-        color: var(--text);
-        outline: none;
-        width: 175px;
-      }
-      .api-inp:focus {
-        border-color: var(--cyan, #40c4ff);
-      }
-      .api-apply {
-        background: var(--s2);
-        border: 1px solid var(--border2);
-        color: var(--sub);
-        font-family: var(--mono);
-        font-size: 8px;
-        text-transform: uppercase;
-        padding: 5px 9px;
-        border-radius: 5px;
-        cursor: pointer;
-      }
-      .api-apply:hover {
-        border-color: var(--green);
-        color: var(--green);
-      }
-
       @media (max-width: 480px) {
         .info-card {
           width: 170px;
@@ -725,16 +916,13 @@
   </head>
   <body>
     <div id="root"></div>
-
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
     <script type="text/babel">
       const { useState, useEffect, useRef, useCallback } = React;
 
-      /* ── Haversine ── */
       function haversine(la1, lo1, la2, lo2) {
         const R = 6371000,
           r = Math.PI / 180,
@@ -771,7 +959,6 @@
         return h[n.charCodeAt(0) % h.length];
       }
 
-      /* ── API helper ── */
       async function apiFetch(base, path, opts = {}) {
         const r = await fetch(base + path, {
           headers: { "Content-Type": "application/json" },
@@ -785,16 +972,14 @@
         return r.json();
       }
 
-      /* ══════════════════════════════════════════════════════════
-   REGISTRATION SCREEN
-══════════════════════════════════════════════════════════ */
+      /* ── REGISTRATION ── */
       function RegScreen({ apiBase, onDone }) {
         const [name, setName] = useState("");
         const [email, setEmail] = useState("");
         const [zone, setZone] = useState(null);
         const [loading, setLoading] = useState(false);
         const [err, setErr] = useState("");
-        const [step, setStep] = useState("form"); // form | gps
+        const [step, setStep] = useState("form");
 
         useEffect(() => {
           apiFetch(apiBase, "/api/zones/active/primary")
@@ -806,19 +991,16 @@
           if (!name.trim()) return setErr("Please enter your name.");
           if (!email.trim() || !email.includes("@"))
             return setErr("Enter a valid email address.");
-          if (!zone)
-            return setErr("No active zone found on server. Ask admin.");
+          if (!zone) return setErr("No active zone found. Ask admin.");
           setErr("");
           setLoading(true);
           setStep("gps");
-
           if (!navigator.geolocation) {
             setErr("Geolocation not supported.");
             setLoading(false);
             setStep("form");
             return;
           }
-
           navigator.geolocation.getCurrentPosition(
             async (pos) => {
               try {
@@ -841,7 +1023,7 @@
             },
             (e) => {
               const msgs = {
-                1: "Permission denied — please allow location.",
+                1: "Permission denied.",
                 2: "GPS unavailable.",
                 3: "GPS timed out.",
               };
@@ -867,7 +1049,6 @@
                   </div>
                 )}
               </div>
-
               <div className="reg-body">
                 {zone && (
                   <div className="reg-info" style={{ marginBottom: 16 }}>
@@ -891,7 +1072,6 @@
                     </div>
                   </div>
                 )}
-
                 {step === "gps" ? (
                   <div style={{ textAlign: "center", padding: "20px 0" }}>
                     <div
@@ -969,24 +1149,21 @@
         );
       }
 
-      /* ══════════════════════════════════════════════════════════
-   MAIN TRACKER
-══════════════════════════════════════════════════════════ */
+      /* ── TRACKER ── */
       function Tracker({ apiBase, session }) {
         const { user, zone } = session;
-        const mapRef = useRef(null);
-        const leafletRef = useRef(null);
-        const circleRef = useRef(null);
-        const markerRef = useRef(null);
-        const accRef = useRef(null);
-        const trailRef = useRef(null);
-        const trailPts = useRef([]);
-        const watchRef = useRef(null);
+        const mapRef = useRef(null),
+          leafletRef = useRef(null),
+          circleRef = useRef(null),
+          markerRef = useRef(null),
+          accRef = useRef(null),
+          trailRef = useRef(null),
+          trailPts = useRef([]),
+          watchRef = useRef(null);
 
         const [pos, setPos] = useState(null);
         const [dist, setDist] = useState(null);
         const [inside, setInside] = useState(null);
-        const [prevInside, setPrev] = useState(null);
         const [accuracy, setAcc] = useState(null);
         const [time, setTime] = useState("—");
         const [gpsOn, setGpsOn] = useState(false);
@@ -994,6 +1171,15 @@
         const [toasts, setToasts] = useState([]);
         const [activeZone, setActiveZone] = useState(zone);
         const wasInsideRef = useRef(null);
+
+        // Check-in state
+        const [ciOpen, setCiOpen] = useState(false);
+        const [ciImage, setCiImage] = useState(null);
+        const [ciPreview, setCiPreview] = useState(null);
+        const [ciNote, setCiNote] = useState("");
+        const [ciSending, setCiSending] = useState(false);
+        const [ciProgress, setCiProgress] = useState(0);
+        const ciFileRef = useRef(null);
 
         /* Init map */
         useEffect(() => {
@@ -1007,8 +1193,6 @@
             maxZoom: 19,
           }).addTo(map);
           leafletRef.current = map;
-
-          // Center marker
           const cIcon = L.divIcon({
             className: "",
             iconSize: [14, 14],
@@ -1021,8 +1205,6 @@
               { direction: "top" },
             )
             .addTo(map);
-
-          // Geofence circle
           circleRef.current = L.circle([zone.lat, zone.lng], {
             radius: zone.radius,
             color: "#00e676",
@@ -1031,15 +1213,12 @@
             weight: 1.5,
             dashArray: "6 4",
           }).addTo(map);
-
-          // Trail
           trailRef.current = L.polyline([], {
             color: "#40c4ff",
             weight: 2,
             opacity: 0.45,
             dashArray: "4 3",
           }).addTo(map);
-
           return () => {
             map.remove();
             if (watchRef.current)
@@ -1047,11 +1226,10 @@
           };
         }, []);
 
-        /* Start GPS watch */
         useEffect(() => {
           watchRef.current = navigator.geolocation.watchPosition(
             (pos) => handlePos(pos),
-            (e) => {
+            () => {
               setGpsErr(true);
               setGpsOn(false);
             },
@@ -1060,7 +1238,6 @@
           return () => navigator.geolocation.clearWatch(watchRef.current);
         }, [activeZone]);
 
-        /* Sync zone every 30s */
         useEffect(() => {
           const t = setInterval(async () => {
             try {
@@ -1088,14 +1265,11 @@
             setPos([lat, lng]);
             setAcc(acc);
             setTime(fmtTime());
-
             const z = activeZone;
             const d = haversine(z.lat, z.lng, lat, lng);
             const ins = d <= z.radius;
             setDist(d);
             setInside(ins);
-
-            // User marker
             const uIcon = L.divIcon({
               className: "",
               iconSize: [18, 18],
@@ -1126,7 +1300,6 @@
             markerRef.current.setTooltipContent(
               `<span style="font-family:JetBrains Mono,monospace;font-size:10px;color:${ins ? "#00e676" : "#ff3d5a"}">${ins ? "▲ Inside" : "▼ Outside"} · ${fmtDist(d)}</span>`,
             );
-
             if (accRef.current) {
               leafletRef.current.removeLayer(accRef.current);
               accRef.current = null;
@@ -1141,21 +1314,17 @@
                 dashArray: "3 3",
               }).addTo(leafletRef.current);
             }
-
             trailPts.current.push([lat, lng]);
             if (trailPts.current.length > 500) trailPts.current.shift();
             trailRef.current.setLatLngs(trailPts.current);
-
-            // Enter/Exit
             if (wasInsideRef.current !== null && wasInsideRef.current !== ins) {
-              const type = ins ? "en" : "ex";
-              const msg = ins ? "▲ Entered zone!" : "▼ Left zone!";
-              addToast(msg, type);
+              addToast(
+                ins ? "▲ Entered zone!" : "▼ Left zone!",
+                ins ? "en" : "ex",
+              );
               flashCircle(ins);
             }
             wasInsideRef.current = ins;
-
-            // Post to backend
             try {
               await apiFetch(apiBase, "/api/users/location", {
                 method: "POST",
@@ -1182,7 +1351,6 @@
             3200,
           );
         }
-
         function flashCircle(ins) {
           const c = ins ? "#00e676" : "#ff3d5a";
           circleRef.current?.setStyle({
@@ -1202,9 +1370,113 @@
             1400,
           );
         }
-
         function goToMe() {
           if (pos) leafletRef.current?.setView(pos, 16);
+        }
+
+        /* ── Check-in helpers ── */
+        function openCi() {
+          setCiOpen(true);
+          setCiImage(null);
+          setCiPreview(null);
+          setCiNote("");
+          setCiProgress(0);
+          setTimeout(() => ciFileRef.current?.click(), 150);
+        }
+        function closeCi() {
+          setCiOpen(false);
+          setCiImage(null);
+          setCiPreview(null);
+          setCiNote("");
+          setCiProgress(0);
+        }
+
+        function onCiFile(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+          // Validate it's an image
+          if (!file.type.startsWith("image/")) {
+            addToast("Please select an image file", "ex");
+            return;
+          }
+          setCiImage(file);
+          const reader = new FileReader();
+          reader.onload = (ev) => setCiPreview(ev.target.result);
+          reader.readAsDataURL(file);
+          // Reset input so same file can be re-selected
+          e.target.value = "";
+        }
+
+        async function submitCi() {
+          if (!ciImage) {
+            addToast("Please take a photo first", "ex");
+            return;
+          }
+          if (!pos) {
+            addToast("GPS not ready yet", "ex");
+            return;
+          }
+          setCiSending(true);
+          setCiProgress(10);
+
+          try {
+            const fd = new FormData();
+            fd.append("image", ciImage);
+            fd.append("lat", pos[0]);
+            fd.append("lng", pos[1]);
+            fd.append("note", ciNote);
+            fd.append("accuracy", accuracy || 0);
+            if (user?._id) fd.append("userId", user._id);
+            if (user?.name) fd.append("userName", user.name);
+            if (user?.email) fd.append("userEmail", user.email);
+
+            setCiProgress(30);
+
+            // Use XMLHttpRequest for progress tracking
+            const result = await new Promise((resolve, reject) => {
+              const xhr = new XMLHttpRequest();
+              xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                  const pct = Math.round((e.loaded / e.total) * 70) + 20;
+                  setCiProgress(Math.min(pct, 90));
+                }
+              };
+              xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                  try {
+                    resolve(JSON.parse(xhr.responseText));
+                  } catch {
+                    resolve({ success: true });
+                  }
+                } else {
+                  try {
+                    reject(
+                      new Error(
+                        JSON.parse(xhr.responseText).error || "Upload failed",
+                      ),
+                    );
+                  } catch {
+                    reject(new Error("Upload failed (" + xhr.status + ")"));
+                  }
+                }
+              };
+              xhr.onerror = () =>
+                reject(new Error("Network error — check server connection"));
+              xhr.open("POST", apiBase + "/api/checkin");
+              xhr.send(fd);
+            });
+
+            setCiProgress(100);
+            setTimeout(() => {
+              addToast("✅ Check-in submitted!", "en");
+              closeCi();
+            }, 400);
+          } catch (e) {
+            addToast("Check-in failed: " + e.message, "ex");
+            setCiProgress(0);
+          } finally {
+            setCiSending(false);
+          }
         }
 
         const badgeCls =
@@ -1218,7 +1490,6 @@
 
         return (
           <div className="app">
-            {/* Topbar */}
             <div className="topbar">
               <div className="brand">
                 <div
@@ -1270,7 +1541,6 @@
               </div>
             </div>
 
-            {/* Map */}
             <div className="map-area">
               <div
                 id="map"
@@ -1278,7 +1548,6 @@
                 style={{ width: "100%", height: "100%" }}
               />
 
-              {/* Toasts */}
               <div className="toasts">
                 {toasts.map((t) => (
                   <div key={t.id} className={`toast ${t.type}`}>
@@ -1287,7 +1556,6 @@
                 ))}
               </div>
 
-              {/* Sync zone btn */}
               <button
                 className="sync-btn"
                 onClick={async () => {
@@ -1304,7 +1572,6 @@
                 ⟳ Sync Zone
               </button>
 
-              {/* Info card */}
               <div className="info-card">
                 <div className="ic-hdr">{activeZone.name}</div>
                 <div className="ic-row">
@@ -1343,30 +1610,144 @@
                 </div>
               </div>
 
-              {/* Status badge */}
               <div className={`status-badge ${badgeCls}`}>
                 <div className={`sb-dot ${inside === null ? "pulse" : ""}`} />
                 {badgeText}
               </div>
 
-              {/* Recenter */}
               <button className="recenter-btn" onClick={goToMe}>
                 ⊙ Me
               </button>
+
+              {/* Check-in button — enabled when GPS is ready */}
+              <button
+                className="checkin-btn"
+                onClick={openCi}
+                disabled={!pos}
+                title={
+                  !pos ? "Waiting for GPS…" : "Tap to open camera & check in"
+                }
+              >
+                📸 Check In
+              </button>
+
+              {/* Check-in modal */}
+              {ciOpen && (
+                <div
+                  className="ci-overlay"
+                  onClick={(e) =>
+                    e.target === e.currentTarget && !ciSending && closeCi()
+                  }
+                >
+                  <div className="ci-modal">
+                    <div className="ci-modal-hdr">
+                      <h2>📸 Zone Check-In</h2>
+                      <p>Take a photo to record your presence</p>
+                    </div>
+                    <div className="ci-modal-body">
+                      <div className="ci-loc-bar">
+                        📍{" "}
+                        <span>
+                          {pos
+                            ? `${pos[0].toFixed(5)}, ${pos[1].toFixed(5)}`
+                            : "Waiting…"}
+                        </span>
+                        &nbsp;·&nbsp;
+                        {dist !== null ? fmtDist(dist) + " from center" : "—"}
+                      </div>
+
+                      {/* Hidden file input — opens camera */}
+                      <input
+                        ref={ciFileRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        style={{ display: "none" }}
+                        onChange={onCiFile}
+                      />
+
+                      <div
+                        className="ci-cam-zone"
+                        onClick={() => !ciSending && ciFileRef.current?.click()}
+                      >
+                        {ciPreview ? (
+                          <>
+                            <img src={ciPreview} alt="preview" />
+                            {ciSending && (
+                              <div className="ci-progress-overlay">
+                                <div className="ci-progress-text">
+                                  Uploading… {ciProgress}%
+                                </div>
+                                <div className="ci-progress-bar-wrap">
+                                  <div
+                                    className="ci-progress-bar"
+                                    style={{ width: ciProgress + "%" }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="ci-cam-placeholder">
+                            <div className="ci-cam-icon">📷</div>
+                            <p>Tap to open camera</p>
+                            <small>Photo saved with location & timestamp</small>
+                          </div>
+                        )}
+                      </div>
+
+                      {ciPreview && !ciSending && (
+                        <button
+                          className="ci-retake"
+                          onClick={() => ciFileRef.current?.click()}
+                        >
+                          ↩ Retake Photo
+                        </button>
+                      )}
+
+                      <textarea
+                        className="ci-note"
+                        rows={2}
+                        placeholder="Optional note… (e.g. 'Morning shift started')"
+                        value={ciNote}
+                        onChange={(e) => setCiNote(e.target.value)}
+                        disabled={ciSending}
+                      />
+
+                      <div className="ci-actions">
+                        <button
+                          className="ci-cancel"
+                          onClick={closeCi}
+                          disabled={ciSending}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="ci-submit"
+                          onClick={submitCi}
+                          disabled={ciSending || !ciImage || !pos}
+                        >
+                          {ciSending ? (
+                            <>⏳ Uploading {ciProgress}%…</>
+                          ) : (
+                            <>✅ Submit Check-In</>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );
       }
 
-      /* ══════════════════════════════════════════════════════════
-   APP ROOT
-══════════════════════════════════════════════════════════ */
       function App() {
-        const [apiBase, setApiBase] = useState(
+        const [apiBase] = useState(
           "https://radius-based-geolocation-tracking.onrender.com",
         );
         const [session, setSession] = useState(null);
-
         return session ? (
           <Tracker apiBase={apiBase} session={session} />
         ) : (

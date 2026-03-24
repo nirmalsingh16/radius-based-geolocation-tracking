@@ -773,6 +773,9 @@
         const [toasts, setToasts] = useState([]);
         const [pickMode, setPickMode] = useState(false);
         const [evtFilter, setEvtFilter] = useState("");
+        const [sosReports, setSosReports] = useState([]);
+        const [activeTab, setActiveTab] = useState("events"); // "events" | "sos"
+        const [sosLightbox, setSosLightbox] = useState(null);
 
         const mapRef = useRef(null);
         const leafletRef = useRef(null);
@@ -895,6 +898,7 @@
             setConnected(true);
             setConnErr(false);
             await loadEvents(z);
+            await loadSos();
             notify("Connected to " + apiBase, "ok");
           } catch (e) {
             setConnected(false);
@@ -913,6 +917,24 @@
           } catch {}
         }
 
+        async function loadSos() {
+          try {
+            const data = await api(apiBase, "/api/checkin?limit=100");
+            setSosReports(data.reports || []);
+          } catch {}
+        }
+
+        async function deleteSos(id) {
+          if (!confirm("Delete this check-in?")) return;
+          try {
+            await api(apiBase, "/api/checkin/" + id, { method: "DELETE" });
+            notify("Check-in deleted", "info");
+            loadSos();
+          } catch (e) {
+            notify(e.message, "err");
+          }
+        }
+
         async function deleteZone(id) {
           if (!confirm("Delete this zone?")) return;
           try {
@@ -927,6 +949,7 @@
         /* Auto-refresh */
         useEffect(() => {
           if (!connected) return;
+          loadSos();
           const t1 = setInterval(() => {
             api(apiBase, "/api/users/live")
               .then(setLiveUsers)
@@ -936,9 +959,11 @@
               .catch(() => {});
           }, 5000);
           const t2 = setInterval(loadEvents, 15000);
+          const t3 = setInterval(loadSos, 30000);
           return () => {
             clearInterval(t1);
             clearInterval(t2);
+            clearInterval(t3);
           };
         }, [connected, apiBase, evtFilter]);
 
@@ -1205,93 +1230,452 @@
                 </div>
               </div>
 
-              {/* Events table */}
+              {/* Events + Check-ins tabbed panel */}
               <div className="events-panel">
-                <div className="ep-hdr">
-                  <span className="ep-title">📋 Event Log</span>
-                  <div
-                    style={{ display: "flex", gap: 8, alignItems: "center" }}
-                  >
-                    <select
-                      className="api-inp"
-                      style={{ width: 140, padding: "3px 7px", fontSize: 9 }}
-                      value={evtFilter}
-                      onChange={(e) => {
-                        setEvtFilter(e.target.value);
-                        loadEvents();
+                <div
+                  className="ep-hdr"
+                  style={{
+                    borderBottom: "1px solid var(--border2)",
+                    paddingBottom: 0,
+                  }}
+                >
+                  <div style={{ display: "flex", gap: 0 }}>
+                    <button
+                      onClick={() => setActiveTab("events")}
+                      style={{
+                        background:
+                          activeTab === "events" ? "var(--s2)" : "transparent",
+                        border: "none",
+                        borderBottom:
+                          activeTab === "events"
+                            ? "2px solid var(--green)"
+                            : "2px solid transparent",
+                        color:
+                          activeTab === "events"
+                            ? "var(--text)"
+                            : "var(--muted)",
+                        padding: "8px 16px",
+                        cursor: "pointer",
+                        fontSize: 11,
+                        fontFamily: "var(--mono)",
                       }}
                     >
-                      <option value="">All Zones</option>
-                      {zones.map((z) => (
-                        <option key={z._id} value={z._id}>
-                          {z.name}
-                        </option>
-                      ))}
-                    </select>
+                      📋 Event Log ({events.length})
+                    </button>
                     <button
-                      className="conn-btn"
-                      style={{ padding: "4px 10px", fontSize: 8 }}
-                      onClick={loadEvents}
+                      onClick={() => setActiveTab("checkins")}
+                      style={{
+                        background:
+                          activeTab === "checkins"
+                            ? "var(--s2)"
+                            : "transparent",
+                        border: "none",
+                        borderBottom:
+                          activeTab === "checkins"
+                            ? "2px solid var(--green)"
+                            : "2px solid transparent",
+                        color:
+                          activeTab === "checkins"
+                            ? "var(--green)"
+                            : "var(--muted)",
+                        padding: "8px 16px",
+                        cursor: "pointer",
+                        fontSize: 11,
+                        fontFamily: "var(--mono)",
+                      }}
                     >
-                      ↺ Refresh
+                      📸 Check-Ins{" "}
+                      {sosReports.length > 0 && (
+                        <span
+                          style={{
+                            background: "var(--green)",
+                            color: "#000",
+                            borderRadius: 10,
+                            padding: "1px 6px",
+                            marginLeft: 5,
+                            fontSize: 9,
+                            fontWeight: 700,
+                          }}
+                        >
+                          {sosReports.length}
+                        </span>
+                      )}
                     </button>
                   </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 8,
+                      alignItems: "center",
+                      paddingBottom: 8,
+                    }}
+                  >
+                    {activeTab === "events" && (
+                      <>
+                        <select
+                          className="api-inp"
+                          style={{
+                            width: 140,
+                            padding: "3px 7px",
+                            fontSize: 9,
+                          }}
+                          value={evtFilter}
+                          onChange={(e) => {
+                            setEvtFilter(e.target.value);
+                            loadEvents();
+                          }}
+                        >
+                          <option value="">All Zones</option>
+                          {zones.map((z) => (
+                            <option key={z._id} value={z._id}>
+                              {z.name}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          className="conn-btn"
+                          style={{ padding: "4px 10px", fontSize: 8 }}
+                          onClick={loadEvents}
+                        >
+                          ↺ Refresh
+                        </button>
+                      </>
+                    )}
+                    {activeTab === "checkins" && (
+                      <button
+                        className="conn-btn"
+                        style={{ padding: "4px 10px", fontSize: 8 }}
+                        onClick={loadSos}
+                      >
+                        ↺ Refresh
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="ep-scroll">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Type</th>
-                        <th>User</th>
-                        <th>Email</th>
-                        <th>Zone</th>
-                        <th>Distance</th>
-                        <th>Time</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {events.map((e) => (
-                        <tr key={e._id}>
-                          <td className={`ev-${e.type}`}>
-                            {e.type === "enter"
-                              ? "↗ ENTER"
-                              : e.type === "exit"
-                                ? "↙ EXIT"
-                                : "⊙ INFO"}
-                          </td>
-                          <td>{e.userName || "—"}</td>
-                          <td style={{ color: "var(--sub)" }}>
-                            {e.userEmail || "—"}
-                          </td>
-                          <td>{e.zoneName || "—"}</td>
-                          <td>
-                            {e.distanceToCenter
-                              ? fmtDist(e.distanceToCenter)
-                              : "—"}
-                          </td>
-                          <td style={{ color: "var(--sub)" }}>
-                            {fmtTime(e.createdAt)}
-                          </td>
-                        </tr>
-                      ))}
-                      {events.length === 0 && (
+
+                {/* Events tab */}
+                {activeTab === "events" && (
+                  <div className="ep-scroll">
+                    <table>
+                      <thead>
                         <tr>
-                          <td
-                            colSpan="6"
+                          <th>Type</th>
+                          <th>User</th>
+                          <th>Email</th>
+                          <th>Zone</th>
+                          <th>Distance</th>
+                          <th>Time</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {events.map((e) => (
+                          <tr key={e._id}>
+                            <td className={`ev-${e.type}`}>
+                              {e.type === "enter"
+                                ? "↗ ENTER"
+                                : e.type === "exit"
+                                  ? "↙ EXIT"
+                                  : "⊙ INFO"}
+                            </td>
+                            <td>{e.userName || "—"}</td>
+                            <td style={{ color: "var(--sub)" }}>
+                              {e.userEmail || "—"}
+                            </td>
+                            <td>{e.zoneName || "—"}</td>
+                            <td>
+                              {e.distanceToCenter
+                                ? fmtDist(e.distanceToCenter)
+                                : "—"}
+                            </td>
+                            <td style={{ color: "var(--sub)" }}>
+                              {fmtTime(e.createdAt)}
+                            </td>
+                          </tr>
+                        ))}
+                        {events.length === 0 && (
+                          <tr>
+                            <td
+                              colSpan="6"
+                              style={{
+                                textAlign: "center",
+                                color: "var(--muted)",
+                                padding: 16,
+                              }}
+                            >
+                              No events yet
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* Check-ins tab — each user in their own section */}
+                {activeTab === "checkins" &&
+                  (() => {
+                    const byUser = {};
+                    sosReports.forEach((r) => {
+                      const key = r.userEmail || r.userName || "unknown";
+                      if (!byUser[key])
+                        byUser[key] = {
+                          name: r.userName,
+                          email: r.userEmail,
+                          reports: [],
+                        };
+                      byUser[key].reports.push(r);
+                    });
+                    const groups = Object.values(byUser);
+                    return (
+                      <div className="ep-scroll">
+                        {groups.length === 0 ? (
+                          <div
                             style={{
                               textAlign: "center",
                               color: "var(--muted)",
-                              padding: 16,
+                              padding: 40,
+                              fontSize: 13,
                             }}
                           >
-                            No events yet
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                            <div style={{ fontSize: 32, marginBottom: 10 }}>
+                              📸
+                            </div>
+                            No check-ins yet
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              padding: "12px 14px",
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 20,
+                            }}
+                          >
+                            {groups.map((group) => (
+                              <div
+                                key={group.email || group.name}
+                                style={{
+                                  background: "var(--s2)",
+                                  border: "1px solid var(--border2)",
+                                  borderRadius: 10,
+                                  overflow: "hidden",
+                                }}
+                              >
+                                {/* User header row */}
+                                <div
+                                  style={{
+                                    background: "var(--s3)",
+                                    borderBottom: "1px solid var(--border)",
+                                    padding: "10px 14px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 10,
+                                    }}
+                                  >
+                                    <div
+                                      style={{
+                                        width: 30,
+                                        height: 30,
+                                        borderRadius: "50%",
+                                        background: "var(--green)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: 11,
+                                        fontWeight: 700,
+                                        color: "#000",
+                                        flexShrink: 0,
+                                      }}
+                                    >
+                                      {(group.name || "?")
+                                        .split(" ")
+                                        .map((w) => w[0])
+                                        .join("")
+                                        .toUpperCase()
+                                        .slice(0, 2)}
+                                    </div>
+                                    <div>
+                                      <div
+                                        style={{
+                                          fontWeight: 600,
+                                          fontSize: 13,
+                                          color: "var(--text)",
+                                        }}
+                                      >
+                                        {group.name || "Unknown"}
+                                      </div>
+                                      <div
+                                        style={{
+                                          fontFamily: "var(--mono)",
+                                          fontSize: 9,
+                                          color: "var(--sub)",
+                                        }}
+                                      >
+                                        {group.email || ""}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div
+                                    style={{
+                                      background: "rgba(0,230,118,0.1)",
+                                      border: "1px solid rgba(0,230,118,0.25)",
+                                      borderRadius: 12,
+                                      padding: "3px 10px",
+                                      fontFamily: "var(--mono)",
+                                      fontSize: 10,
+                                      color: "var(--green)",
+                                    }}
+                                  >
+                                    {group.reports.length} check-in
+                                    {group.reports.length !== 1 ? "s" : ""}
+                                  </div>
+                                </div>
+                                {/* Photo grid for this user only */}
+                                <div
+                                  style={{
+                                    display: "grid",
+                                    gridTemplateColumns:
+                                      "repeat(auto-fill, minmax(180px, 1fr))",
+                                    gap: 10,
+                                    padding: 12,
+                                  }}
+                                >
+                                  {group.reports.map((r) => (
+                                    <div
+                                      key={r._id}
+                                      style={{
+                                        background: "var(--s1)",
+                                        border: "1px solid var(--border)",
+                                        borderRadius: 8,
+                                        overflow: "hidden",
+                                      }}
+                                    >
+                                      <img
+                                        src={r.imageUrl}
+                                        alt="check-in"
+                                        style={{
+                                          width: "100%",
+                                          height: 130,
+                                          objectFit: "cover",
+                                          display: "block",
+                                          cursor: "zoom-in",
+                                        }}
+                                        onClick={() =>
+                                          setSosLightbox(r.imageUrl)
+                                        }
+                                      />
+                                      <div style={{ padding: "8px 10px" }}>
+                                        <div
+                                          style={{
+                                            fontFamily: "var(--mono)",
+                                            fontSize: 9,
+                                            color: "var(--sub)",
+                                            marginBottom: 2,
+                                          }}
+                                        >
+                                          🕐 {fmtTime(r.createdAt)}
+                                        </div>
+                                        <div
+                                          style={{
+                                            fontFamily: "var(--mono)",
+                                            fontSize: 9,
+                                            color: "var(--sub)",
+                                            marginBottom: r.note ? 4 : 6,
+                                          }}
+                                        >
+                                          📍 {r.lat?.toFixed(4)},{" "}
+                                          {r.lng?.toFixed(4)}
+                                          <a
+                                            href={`https://www.google.com/maps?q=${r.lat},${r.lng}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{
+                                              marginLeft: 5,
+                                              color: "var(--blue)",
+                                            }}
+                                          >
+                                            ↗
+                                          </a>
+                                        </div>
+                                        {r.note && (
+                                          <div
+                                            style={{
+                                              fontSize: 10,
+                                              color: "var(--amber)",
+                                              background:
+                                                "rgba(255,171,0,0.07)",
+                                              borderRadius: 4,
+                                              padding: "3px 6px",
+                                              marginBottom: 6,
+                                              fontStyle: "italic",
+                                            }}
+                                          >
+                                            "{r.note}"
+                                          </div>
+                                        )}
+                                        <button
+                                          onClick={() => deleteSos(r._id)}
+                                          style={{
+                                            width: "100%",
+                                            background: "transparent",
+                                            border: "1px solid var(--border2)",
+                                            color: "var(--muted)",
+                                            fontSize: 9,
+                                            padding: "4px 0",
+                                            borderRadius: 4,
+                                            cursor: "pointer",
+                                            fontFamily: "var(--mono)",
+                                          }}
+                                        >
+                                          🗑 Delete
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
               </div>
+
+              {/* Lightbox */}
+              {sosLightbox && (
+                <div
+                  onClick={() => setSosLightbox(null)}
+                  style={{
+                    position: "fixed",
+                    inset: 0,
+                    background: "rgba(0,0,0,0.92)",
+                    zIndex: 9999,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "zoom-out",
+                  }}
+                >
+                  <img
+                    src={sosLightbox}
+                    style={{
+                      maxWidth: "92vw",
+                      maxHeight: "88vh",
+                      borderRadius: 10,
+                      boxShadow: "0 8px 50px rgba(0,0,0,.7)",
+                    }}
+                    alt="check-in full"
+                  />
+                </div>
+              )}
             </main>
 
             {/* Toasts */}
