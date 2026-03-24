@@ -617,7 +617,7 @@
         border: 1px solid var(--border2);
         border-radius: 16px;
         width: 100%;
-        max-width: 360px;
+        max-width: 400px;
         overflow: hidden;
         box-shadow: 0 12px 50px rgba(0, 0, 0, 0.7);
       }
@@ -660,7 +660,7 @@
         color: var(--blue);
       }
 
-      /* Camera preview area */
+      /* Camera zone */
       .ci-cam-zone {
         border: 2px dashed var(--border2);
         border-radius: 10px;
@@ -668,7 +668,7 @@
         margin-bottom: 10px;
         cursor: pointer;
         transition: border-color 0.15s;
-        min-height: 140px;
+        min-height: 180px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -680,7 +680,13 @@
       }
       .ci-cam-zone img {
         width: 100%;
-        max-height: 220px;
+        max-height: 240px;
+        object-fit: cover;
+        display: block;
+      }
+      .ci-cam-zone video {
+        width: 100%;
+        max-height: 240px;
         object-fit: cover;
         display: block;
       }
@@ -702,6 +708,33 @@
         font-size: 10px;
         color: var(--muted);
         font-family: var(--mono);
+      }
+
+      /* Webcam snap button overlay */
+      .ci-snap-overlay {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+      }
+      .ci-snap-btn {
+        background: var(--green);
+        border: none;
+        color: #050d07;
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 8px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        letter-spacing: 0.05em;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        transition: all 0.15s;
+      }
+      .ci-snap-btn:hover {
+        background: #33ee88;
+        transform: scale(1.05);
       }
 
       /* Upload progress overlay */
@@ -754,6 +787,7 @@
         border-color: var(--amber);
         color: var(--amber);
       }
+
       .ci-note {
         width: 100%;
         background: var(--s2);
@@ -817,6 +851,16 @@
       .ci-submit:disabled {
         opacity: 0.4;
         cursor: not-allowed;
+      }
+
+      /* Webcam error */
+      .ci-cam-error {
+        text-align: center;
+        padding: 20px;
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--red);
+        line-height: 1.6;
       }
 
       /* TOASTS */
@@ -922,6 +966,8 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script type="text/babel">
       const { useState, useEffect, useRef, useCallback } = React;
+
+      const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
 
       function haversine(la1, lo1, la2, lo2) {
         const R = 6371000,
@@ -1149,6 +1195,122 @@
         );
       }
 
+      /* ── WEBCAM COMPONENT (Desktop only) ── */
+      function WebcamCapture({ onCapture, onError }) {
+        const videoRef = useRef(null);
+        const streamRef = useRef(null);
+        const [ready, setReady] = useState(false);
+        const [error, setError] = useState(null);
+
+        useEffect(() => {
+          let cancelled = false;
+          navigator.mediaDevices
+            .getUserMedia({ video: { facingMode: "user" }, audio: false })
+            .then((stream) => {
+              if (cancelled) {
+                stream.getTracks().forEach((t) => t.stop());
+                return;
+              }
+              streamRef.current = stream;
+              if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                videoRef.current.play();
+                setReady(true);
+              }
+            })
+            .catch((err) => {
+              const msg =
+                err.name === "NotAllowedError"
+                  ? "Camera access denied. Please allow camera in your browser settings."
+                  : err.name === "NotFoundError"
+                    ? "No camera found on this device."
+                    : "Could not open camera: " + err.message;
+              setError(msg);
+              if (onError) onError(msg);
+            });
+          return () => {
+            cancelled = true;
+            if (streamRef.current)
+              streamRef.current.getTracks().forEach((t) => t.stop());
+          };
+        }, []);
+
+        function snap() {
+          const video = videoRef.current;
+          if (!video || !ready) return;
+          const canvas = document.createElement("canvas");
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          canvas.getContext("2d").drawImage(video, 0, 0);
+          canvas.toBlob(
+            (blob) => {
+              const file = new File([blob], "webcam-checkin.jpg", {
+                type: "image/jpeg",
+              });
+              onCapture(file, canvas.toDataURL("image/jpeg", 0.92));
+              // Stop stream after capture
+              if (streamRef.current)
+                streamRef.current.getTracks().forEach((t) => t.stop());
+            },
+            "image/jpeg",
+            0.92,
+          );
+        }
+
+        if (error) {
+          return (
+            <div className="ci-cam-error">
+              ⚠ {error}
+              <br />
+              <br />
+              <small style={{ color: "var(--muted)" }}>
+                You can still upload a photo using the file picker below.
+              </small>
+            </div>
+          );
+        }
+
+        return (
+          <div style={{ position: "relative", width: "100%" }}>
+            <video
+              ref={videoRef}
+              playsInline
+              muted
+              style={{
+                width: "100%",
+                maxHeight: 240,
+                objectFit: "cover",
+                display: "block",
+                borderRadius: 8,
+              }}
+            />
+            {!ready && (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: "var(--mono)",
+                  fontSize: 10,
+                  color: "var(--sub)",
+                }}
+              >
+                Starting camera…
+              </div>
+            )}
+            {ready && (
+              <div className="ci-snap-overlay">
+                <button className="ci-snap-btn" onClick={snap}>
+                  📸 Snap Photo
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      }
+
       /* ── TRACKER ── */
       function Tracker({ apiBase, session }) {
         const { user, zone } = session;
@@ -1179,6 +1341,8 @@
         const [ciNote, setCiNote] = useState("");
         const [ciSending, setCiSending] = useState(false);
         const [ciProgress, setCiProgress] = useState(0);
+        const [ciMode, setCiMode] = useState("camera"); // "camera" | "preview"
+        const [ciWebcamError, setCiWebcamError] = useState(false);
         const ciFileRef = useRef(null);
 
         /* Init map */
@@ -1381,29 +1545,63 @@
           setCiPreview(null);
           setCiNote("");
           setCiProgress(0);
-          setTimeout(() => ciFileRef.current?.click(), 150);
+          setCiMode("camera");
+          setCiWebcamError(false);
+
+          if (isMobile) {
+            // On mobile, immediately trigger the file input with camera capture
+            setTimeout(() => ciFileRef.current?.click(), 150);
+          }
+          // On desktop, WebcamCapture component handles camera automatically
         }
+
         function closeCi() {
           setCiOpen(false);
           setCiImage(null);
           setCiPreview(null);
           setCiNote("");
           setCiProgress(0);
+          setCiMode("camera");
+          setCiWebcamError(false);
         }
 
+        // Called by WebcamCapture after snap (desktop)
+        function onWebcamCapture(file, previewDataUrl) {
+          setCiImage(file);
+          setCiPreview(previewDataUrl);
+          setCiMode("preview");
+        }
+
+        // Called when webcam fails on desktop — fall back to file picker
+        function onWebcamError() {
+          setCiWebcamError(true);
+        }
+
+        function retake() {
+          setCiImage(null);
+          setCiPreview(null);
+          setCiMode("camera");
+          setCiWebcamError(false);
+          if (isMobile) {
+            setTimeout(() => ciFileRef.current?.click(), 100);
+          }
+        }
+
+        // File input change (mobile camera / desktop fallback file picker)
         function onCiFile(e) {
           const file = e.target.files[0];
           if (!file) return;
-          // Validate it's an image
           if (!file.type.startsWith("image/")) {
             addToast("Please select an image file", "ex");
             return;
           }
           setCiImage(file);
           const reader = new FileReader();
-          reader.onload = (ev) => setCiPreview(ev.target.result);
+          reader.onload = (ev) => {
+            setCiPreview(ev.target.result);
+            setCiMode("preview");
+          };
           reader.readAsDataURL(file);
-          // Reset input so same file can be re-selected
           e.target.value = "";
         }
 
@@ -1418,7 +1616,6 @@
           }
           setCiSending(true);
           setCiProgress(10);
-
           try {
             const fd = new FormData();
             fd.append("image", ciImage);
@@ -1429,10 +1626,7 @@
             if (user?._id) fd.append("userId", user._id);
             if (user?.name) fd.append("userName", user.name);
             if (user?.email) fd.append("userEmail", user.email);
-
             setCiProgress(30);
-
-            // Use XMLHttpRequest for progress tracking
             const result = await new Promise((resolve, reject) => {
               const xhr = new XMLHttpRequest();
               xhr.upload.onprogress = (e) => {
@@ -1465,7 +1659,6 @@
               xhr.open("POST", apiBase + "/api/checkin");
               xhr.send(fd);
             });
-
             setCiProgress(100);
             setTimeout(() => {
               addToast("✅ Check-in submitted!", "en");
@@ -1619,7 +1812,6 @@
                 ⊙ Me
               </button>
 
-              {/* Check-in button — enabled when GPS is ready */}
               <button
                 className="checkin-btn"
                 onClick={openCi}
@@ -1631,7 +1823,7 @@
                 📸 Check In
               </button>
 
-              {/* Check-in modal */}
+              {/* ── Check-in Modal ── */}
               {ciOpen && (
                 <div
                   className="ci-overlay"
@@ -1656,21 +1848,30 @@
                         {dist !== null ? fmtDist(dist) + " from center" : "—"}
                       </div>
 
-                      {/* Hidden file input — opens camera */}
+                      {/* Hidden file input — mobile: opens camera; desktop fallback: file picker */}
                       <input
                         ref={ciFileRef}
                         type="file"
                         accept="image/*"
-                        capture="environment"
+                        capture={isMobile ? "environment" : undefined}
                         style={{ display: "none" }}
                         onChange={onCiFile}
                       />
 
+                      {/* Camera / preview zone */}
                       <div
                         className="ci-cam-zone"
-                        onClick={() => !ciSending && ciFileRef.current?.click()}
+                        style={{
+                          cursor:
+                            ciMode === "preview" && !ciSending
+                              ? "pointer"
+                              : "default",
+                        }}
+                        onClick={() =>
+                          ciMode === "preview" && !ciSending && retake()
+                        }
                       >
-                        {ciPreview ? (
+                        {ciMode === "preview" && ciPreview ? (
                           <>
                             <img src={ciPreview} alt="preview" />
                             {ciSending && (
@@ -1687,21 +1888,45 @@
                               </div>
                             )}
                           </>
+                        ) : ciMode === "camera" && !isMobile ? (
+                          /* Desktop: live webcam stream */
+                          <WebcamCapture
+                            onCapture={onWebcamCapture}
+                            onError={onWebcamError}
+                          />
                         ) : (
+                          /* Mobile: placeholder (file input triggers immediately on open) */
                           <div className="ci-cam-placeholder">
                             <div className="ci-cam-icon">📷</div>
-                            <p>Tap to open camera</p>
-                            <small>Photo saved with location & timestamp</small>
+                            <p>Opening camera…</p>
+                            <small>
+                              Photo saved with location &amp; timestamp
+                            </small>
                           </div>
                         )}
                       </div>
 
-                      {ciPreview && !ciSending && (
+                      {/* Retake / fallback buttons */}
+                      {ciMode === "preview" && !ciSending && (
+                        <button className="ci-retake" onClick={retake}>
+                          ↩ Retake Photo
+                        </button>
+                      )}
+                      {ciMode === "camera" && !isMobile && ciWebcamError && (
                         <button
                           className="ci-retake"
                           onClick={() => ciFileRef.current?.click()}
                         >
-                          ↩ Retake Photo
+                          📁 Choose from Files Instead
+                        </button>
+                      )}
+                      {ciMode === "camera" && !isMobile && !ciWebcamError && (
+                        <button
+                          className="ci-retake"
+                          style={{ marginBottom: 10 }}
+                          onClick={() => ciFileRef.current?.click()}
+                        >
+                          📁 Upload from Files Instead
                         </button>
                       )}
 
