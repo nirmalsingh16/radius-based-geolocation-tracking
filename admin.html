@@ -9,6 +9,10 @@
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
     <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"
+    />
+    <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
@@ -52,11 +56,11 @@
         color: var(--text);
       }
 
-      /* ── LAYOUT ── */
+      /* LAYOUT */
       .shell {
         display: grid;
         grid-template-rows: 54px 1fr;
-        grid-template-columns: 310px 1fr;
+        grid-template-columns: 320px 1fr;
         height: 100vh;
       }
       .topbar {
@@ -90,7 +94,7 @@
         position: relative;
       }
 
-      /* ── TOPBAR ── */
+      /* TOPBAR */
       .brand {
         display: flex;
         align-items: center;
@@ -178,7 +182,6 @@
         font-size: 13px;
         font-weight: 600;
         line-height: 1.3;
-        color: var(--cyan);
       }
       .spill-l {
         font-size: 8px;
@@ -223,7 +226,7 @@
         color: var(--sub);
       }
 
-      /* ── SIDEBAR ── */
+      /* SIDEBAR */
       .sb-sec {
         border-bottom: 1px solid var(--border);
       }
@@ -250,6 +253,31 @@
         padding: 12px 14px;
       }
 
+      /* Tab switcher inside sidebar section */
+      .zone-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border);
+        margin: 0 -14px;
+        padding: 0 14px;
+      }
+      .ztab {
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 7px 10px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .ztab.active {
+        border-bottom-color: var(--cyan);
+        color: var(--cyan);
+      }
+
       /* Form */
       .fld {
         margin-bottom: 11px;
@@ -264,7 +292,8 @@
         margin-bottom: 5px;
       }
       .fld input,
-      .fld select {
+      .fld select,
+      .fld textarea {
         width: 100%;
         background: var(--s2);
         border: 1px solid var(--border);
@@ -277,8 +306,14 @@
         transition: border 0.15s;
       }
       .fld input:focus,
-      .fld select:focus {
+      .fld select:focus,
+      .fld textarea:focus {
         border-color: var(--cyan);
+      }
+      .fld textarea {
+        resize: vertical;
+        min-height: 64px;
+        font-size: 10px;
       }
       .fld-row {
         display: grid;
@@ -330,6 +365,14 @@
       .btn-danger:hover {
         background: rgba(255, 61, 90, 0.08);
       }
+      .btn-amber {
+        background: transparent;
+        border: 1px solid var(--amber);
+        color: var(--amber);
+      }
+      .btn-amber:hover {
+        background: rgba(255, 171, 0, 0.08);
+      }
       .pick-hint {
         font-family: var(--mono);
         font-size: 9px;
@@ -338,6 +381,84 @@
         display: flex;
         align-items: center;
         gap: 6px;
+      }
+
+      /* Pincode tags input */
+      .pc-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-bottom: 8px;
+        min-height: 28px;
+      }
+      .pc-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(0, 188, 212, 0.1);
+        border: 1px solid rgba(0, 188, 212, 0.3);
+        border-radius: 20px;
+        padding: 2px 10px;
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--cyan);
+      }
+      .pc-tag button {
+        background: none;
+        border: none;
+        color: var(--cyan);
+        cursor: pointer;
+        font-size: 11px;
+        padding: 0;
+        line-height: 1;
+        opacity: 0.7;
+      }
+      .pc-tag button:hover {
+        opacity: 1;
+      }
+      .pc-resolve-btn {
+        width: 100%;
+        padding: 7px;
+        background: rgba(0, 188, 212, 0.08);
+        border: 1px solid rgba(0, 188, 212, 0.25);
+        border-radius: 6px;
+        color: var(--cyan);
+        font-family: var(--mono);
+        font-size: 9px;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+      }
+      .pc-resolve-btn:hover {
+        background: rgba(0, 188, 212, 0.16);
+      }
+      .pc-resolve-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .pc-status {
+        font-family: var(--mono);
+        font-size: 9px;
+        padding: 5px 8px;
+        border-radius: 5px;
+        margin-bottom: 8px;
+      }
+      .pc-status.ok {
+        background: rgba(0, 230, 118, 0.08);
+        border: 1px solid rgba(0, 230, 118, 0.2);
+        color: var(--green);
+      }
+      .pc-status.err {
+        background: rgba(255, 61, 90, 0.08);
+        border: 1px solid rgba(255, 61, 90, 0.2);
+        color: var(--red);
+      }
+      .pc-status.loading {
+        background: rgba(255, 171, 0, 0.08);
+        border: 1px solid rgba(255, 171, 0, 0.2);
+        color: var(--amber);
       }
 
       /* Zone list */
@@ -382,6 +503,11 @@
         color: var(--red);
         border: 1px solid rgba(255, 61, 90, 0.2);
       }
+      .zi-pc {
+        background: rgba(0, 188, 212, 0.1);
+        color: var(--cyan);
+        border: 1px solid rgba(0, 188, 212, 0.25);
+      }
       .zi-meta {
         font-family: var(--mono);
         font-size: 9px;
@@ -413,10 +539,30 @@
         border-radius: 50%;
         flex-shrink: 0;
       }
+      .u-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1.5px solid var(--border2);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: #000;
+        overflow: hidden;
+      }
+      .u-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
       .u-name {
         font-size: 12px;
         font-weight: 500;
-        flex: 1;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -430,13 +576,61 @@
         white-space: nowrap;
         max-width: 120px;
       }
+      .u-pincode {
+        font-family: var(--mono);
+        font-size: 8px;
+        color: var(--amber);
+        margin-top: 1px;
+      }
       .u-status {
         font-family: var(--mono);
         font-size: 9px;
         font-weight: 600;
       }
 
-      /* ── MAP ── */
+      /* Pincode admin panel */
+      .pc-admin-panel {
+        background: var(--s2);
+        border: 1px solid var(--border2);
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
+      }
+      .pc-admin-title {
+        font-family: var(--mono);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--cyan);
+        margin-bottom: 8px;
+      }
+      .pc-user-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .pc-user-row:last-child {
+        border: none;
+      }
+      .pc-user-name {
+        font-size: 11px;
+        font-weight: 500;
+        flex: 1;
+      }
+      .pc-user-pin {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--amber);
+      }
+      .pc-user-status {
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 700;
+      }
+
+      /* MAP */
       .map-wrap {
         position: relative;
         overflow: hidden;
@@ -448,6 +642,172 @@
       .leaflet-container {
         background: #030508 !important;
       }
+
+      /* ── POLYGON DRAWING STYLES ── */
+      .poly-coord-area {
+        width: 100%;
+        font-family: var(--mono);
+        font-size: 9px;
+        background: var(--s3);
+        border: 1px solid var(--border2);
+        border-radius: 6px;
+        color: var(--text);
+        padding: 8px;
+        resize: vertical;
+        min-height: 80px;
+        margin-bottom: 6px;
+      }
+      .poly-coord-area:focus {
+        outline: none;
+        border-color: var(--purple);
+      }
+      .poly-draw-btn {
+        width: 100%;
+        padding: 7px;
+        background: rgba(179, 136, 255, 0.08);
+        border: 1px solid rgba(179, 136, 255, 0.3);
+        border-radius: 6px;
+        color: var(--purple);
+        font-family: var(--mono);
+        font-size: 9px;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 6px;
+        transition: all 0.15s;
+      }
+      .poly-draw-btn:hover {
+        background: rgba(179, 136, 255, 0.16);
+      }
+      .poly-draw-btn.active {
+        background: rgba(179, 136, 255, 0.25);
+        border-color: var(--purple);
+        color: #fff;
+      }
+      .poly-draw-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .poly-vertex-count {
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--purple);
+        margin-bottom: 6px;
+        text-align: center;
+      }
+      .poly-hint {
+        font-family: var(--mono);
+        font-size: 8px;
+        color: var(--sub);
+        background: rgba(179, 136, 255, 0.06);
+        border: 1px solid rgba(179, 136, 255, 0.15);
+        border-radius: 4px;
+        padding: 5px 8px;
+        margin-bottom: 8px;
+        line-height: 1.5;
+      }
+
+      /* ── USER PROFILE POPUP (Leaflet) ── */
+      .leaflet-popup-content-wrapper {
+        background: #0e111e !important;
+        border: 1px solid #222640 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7) !important;
+        padding: 0 !important;
+      }
+      .leaflet-popup-content {
+        margin: 0 !important;
+        width: auto !important;
+      }
+      .leaflet-popup-tip {
+        background: #0e111e !important;
+      }
+      .leaflet-popup-close-button {
+        color: #7a8099 !important;
+        font-size: 16px !important;
+        top: 6px !important;
+        right: 8px !important;
+      }
+      .user-popup {
+        min-width: 200px;
+        padding: 14px;
+        font-family: var(--sans);
+      }
+      .user-popup-avatar {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: 700;
+        color: #000;
+        margin: 0 auto 10px;
+        overflow: hidden;
+        border: 2px solid var(--border2);
+      }
+      .user-popup-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .user-popup-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        text-align: center;
+        margin-bottom: 2px;
+      }
+      .user-popup-email {
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--sub);
+        text-align: center;
+        margin-bottom: 8px;
+        word-break: break-all;
+      }
+      .user-popup-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--sub);
+        padding: 3px 0;
+        border-top: 1px solid var(--border);
+      }
+      .user-popup-row span:last-child {
+        color: var(--text);
+        text-align: right;
+      }
+
+      /* ── ZONE LIST POLYGON BADGE ── */
+      .zi-badge.zi-poly {
+        background: rgba(179, 136, 255, 0.15);
+        border: 1px solid rgba(179, 136, 255, 0.3);
+        color: var(--purple);
+      }
+
+      /* ── PINCODE DISTRICT INFO ── */
+      .pc-district-badge {
+        font-family: var(--mono);
+        font-size: 8px;
+        color: var(--amber);
+        background: rgba(255, 171, 0, 0.07);
+        border: 1px solid rgba(255, 171, 0, 0.2);
+        border-radius: 10px;
+        padding: 1px 7px;
+        display: inline-block;
+        margin-top: 3px;
+      }
+      .pc-area-line {
+        font-family: var(--mono);
+        font-size: 8px;
+        color: var(--sub);
+        margin-top: 2px;
+      }
+
       .leaflet-tile {
         filter: brightness(0.28) saturate(0.1) hue-rotate(210deg);
       }
@@ -459,8 +819,6 @@
       .leaflet-control-attribution {
         display: none !important;
       }
-
-      /* Map overlays */
       .map-hint {
         position: absolute;
         bottom: 10px;
@@ -478,7 +836,7 @@
         white-space: nowrap;
       }
 
-      /* ── EVENTS TABLE ── */
+      /* EVENTS TABLE */
       .events-panel {
         background: var(--s1);
         border-top: 1px solid var(--border);
@@ -493,13 +851,6 @@
         align-items: center;
         justify-content: space-between;
         flex-shrink: 0;
-      }
-      .ep-title {
-        font-family: var(--mono);
-        font-size: 8px;
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: var(--sub);
       }
       .ep-scroll {
         flex: 1;
@@ -551,7 +902,7 @@
         color: var(--amber);
       }
 
-      /* ── TOAST ── */
+      /* TOASTS */
       .notif {
         position: fixed;
         top: 62px;
@@ -598,8 +949,9 @@
   </head>
   <body>
     <div id="root"></div>
-
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Turf.js for pincode polygon preview on map -->
+    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -613,12 +965,36 @@
       function fmtTime(d) {
         return new Date(d).toLocaleTimeString();
       }
+      function initials(n) {
+        return (n || "?")
+          .split(" ")
+          .map((w) => w[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2);
+      }
+      function avatarColors(n) {
+        const h = [
+          "#00e676",
+          "#40c4ff",
+          "#b388ff",
+          "#ffab00",
+          "#ff6d00",
+          "#f48fb1",
+        ];
+        return h[(n || "").charCodeAt(0) % h.length];
+      }
 
       async function api(base, path, opts = {}) {
+        const isFormData = opts.body instanceof FormData;
         const r = await fetch(base + path, {
-          headers: { "Content-Type": "application/json" },
+          headers: isFormData ? {} : { "Content-Type": "application/json" },
           ...opts,
-          body: opts.body ? JSON.stringify(opts.body) : undefined,
+          body: isFormData
+            ? opts.body
+            : opts.body
+              ? JSON.stringify(opts.body)
+              : undefined,
         });
         if (!r.ok) {
           const e = await r.json().catch(() => ({}));
@@ -639,8 +1015,15 @@
         );
       }
 
-      /* ── ZONE FORM ── */
-      function ZoneForm({ apiBase, editZone, onSaved, notify }) {
+      /* ── CIRCULAR ZONE FORM ── */
+      function CircularZoneForm({
+        apiBase,
+        editZone,
+        onSaved,
+        notify,
+        onPickMode,
+        pickMode,
+      }) {
         const [name, setName] = useState(editZone?.name || "");
         const [lat, setLat] = useState(editZone?.lat || "");
         const [lng, setLng] = useState(editZone?.lng || "");
@@ -666,6 +1049,7 @@
             lng: +lng,
             radius: +radius,
             active,
+            pincodes: [],
           };
           try {
             if (editZone?._id) {
@@ -739,10 +1123,657 @@
                 <option value="false">Inactive</option>
               </select>
             </div>
+            <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+              <button
+                className="btn btn-ghost btn-sm"
+                style={{ flex: 1 }}
+                onClick={onPickMode}
+              >
+                {pickMode ? "✕ Cancel Pick" : "⌖ Pick on Map"}
+              </button>
+            </div>
             <div className="pick-hint">⌖ Click map to set center point</div>
             <button className="btn btn-primary" onClick={save}>
               💾 {editZone?._id ? "Update" : "Create"} Zone
             </button>
+          </div>
+        );
+      }
+
+      /* ── PINCODE ZONE FORM ── */
+      function PincodeZoneForm({
+        apiBase,
+        editZone,
+        onSaved,
+        notify,
+        onPreviewPolygon,
+      }) {
+        const [name, setName] = useState(editZone?.name || "");
+        const [pincodeInput, setPincodeInput] = useState("");
+        const [pincodes, setPincodes] = useState(editZone?.pincodes || []);
+        const [active, setActive] = useState(editZone?.active !== false);
+        const [resolving, setResolving] = useState(false);
+        const [resolveStatus, setResolveStatus] = useState(null); // null | { ok, msg }
+
+        useEffect(() => {
+          setName(editZone?.name || "");
+          setPincodes(editZone?.pincodes || []);
+          setActive(editZone?.active !== false);
+          setResolveStatus(null);
+        }, [editZone]);
+
+        function addPincode() {
+          const pc = pincodeInput.trim().replace(/\D/g, "");
+          if (pc.length !== 6) {
+            notify("Enter a valid 6-digit pincode", "err");
+            return;
+          }
+          if (pincodes.includes(pc)) {
+            notify("Pincode already added", "err");
+            return;
+          }
+          setPincodes((p) => [...p, pc]);
+          setPincodeInput("");
+          setResolveStatus(null);
+        }
+        function removePincode(pc) {
+          setPincodes((p) => p.filter((x) => x !== pc));
+          setResolveStatus(null);
+        }
+
+        async function resolvePreview() {
+          if (pincodes.length === 0) {
+            notify("Add at least one pincode first", "err");
+            return;
+          }
+          setResolving(true);
+          setResolveStatus({
+            ok: null,
+            msg: `Resolving ${pincodes.length} pincode(s) via OpenStreetMap… (may take a few seconds)`,
+          });
+          try {
+            const result = await api(apiBase, "/api/zones/resolve-pincodes", {
+              method: "POST",
+              body: { pincodes },
+            });
+            setResolveStatus({
+              ok: true,
+              msg: `✓ Polygon resolved — centre: ${result.center.lat.toFixed(4)}, ${result.center.lng.toFixed(4)}`,
+            });
+            onPreviewPolygon(result.boundary, result.center);
+          } catch (e) {
+            setResolveStatus({ ok: false, msg: "✗ " + e.message });
+          } finally {
+            setResolving(false);
+          }
+        }
+
+        async function save() {
+          if (!name) {
+            notify("Zone name required", "err");
+            return;
+          }
+          if (pincodes.length === 0) {
+            notify("Add at least one pincode", "err");
+            return;
+          }
+          notify(
+            "Creating zone — resolving pincodes… (may take ~" +
+              pincodes.length * 2 +
+              "s)",
+            "info",
+          );
+          try {
+            if (editZone?._id) {
+              await api(apiBase, "/api/zones/" + editZone._id, {
+                method: "PUT",
+                body: { name, pincodes, active },
+              });
+              notify("Zone updated ✓", "ok");
+            } else {
+              await api(apiBase, "/api/zones", {
+                method: "POST",
+                body: { name, pincodes, active },
+              });
+              notify("Zone created ✓", "ok");
+            }
+            onSaved();
+          } catch (e) {
+            notify(e.message, "err");
+          }
+        }
+
+        return (
+          <div className="sb-body">
+            <div className="fld">
+              <label>Zone Name</label>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Delhi Zone A"
+              />
+            </div>
+
+            <div className="fld">
+              <label>Pincodes</label>
+              <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+                <input
+                  value={pincodeInput}
+                  onChange={(e) =>
+                    setPincodeInput(
+                      e.target.value.replace(/\D/g, "").slice(0, 6),
+                    )
+                  }
+                  onKeyDown={(e) => e.key === "Enter" && addPincode()}
+                  placeholder="110001"
+                  inputMode="numeric"
+                  maxLength={6}
+                  style={{ flex: 1 }}
+                />
+                <button className="conn-btn" onClick={addPincode}>
+                  + Add
+                </button>
+              </div>
+              {pincodes.length > 0 && (
+                <div className="pc-tags">
+                  {pincodes.map((pc) => (
+                    <span key={pc} className="pc-tag">
+                      {pc}
+                      <button onClick={() => removePincode(pc)}>×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {pincodes.length > 0 && (
+              <button
+                className="pc-resolve-btn"
+                onClick={resolvePreview}
+                disabled={resolving}
+              >
+                {resolving ? "⏳ Resolving…" : "🗺 Preview Polygon on Map"}
+              </button>
+            )}
+
+            {resolveStatus && (
+              <div
+                className={`pc-status ${resolveStatus.ok === null ? "loading" : resolveStatus.ok ? "ok" : "err"}`}
+              >
+                {resolveStatus.msg}
+              </div>
+            )}
+
+            <div className="fld">
+              <label>Status</label>
+              <select
+                value={active}
+                onChange={(e) => setActive(e.target.value === "true")}
+              >
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+
+            <div className="pick-hint" style={{ marginBottom: 10 }}>
+              ℹ Polygons are fetched from OpenStreetMap. One API call per
+              pincode (~1s each).
+            </div>
+            <button className="btn btn-primary" onClick={save}>
+              💾 {editZone?._id ? "Update" : "Create"} Pincode Zone
+            </button>
+          </div>
+        );
+      }
+
+      /* ── POLYGON ZONE FORM ── */
+      function PolygonZoneForm({
+        apiBase,
+        editZone,
+        onSaved,
+        notify,
+        onDrawMode,
+        drawMode,
+        drawnCoords,
+        onClearDraw,
+      }) {
+        const [name, setName] = React.useState(editZone?.name || "");
+        const [active, setActive] = React.useState(editZone?.active !== false);
+        const [manualInput, setManualInput] = React.useState("");
+        const [resolving, setResolving] = React.useState(false);
+        const [previewStatus, setPreviewStatus] = React.useState(null);
+
+        React.useEffect(() => {
+          setName(editZone?.name || "");
+          setActive(editZone?.active !== false);
+          // If editing an existing polygon zone, prefill manual textarea with its coords
+          if (
+            editZone?.zoneType === "polygon" &&
+            editZone?.boundary?.coordinates?.[0]
+          ) {
+            const ring = editZone.boundary.coordinates[0];
+            const pairs = ring
+              .slice(0, -1)
+              .map(([lng, lat]) => `${lat}, ${lng}`)
+              .join("\n");
+            setManualInput(pairs);
+          } else {
+            setManualInput("");
+          }
+        }, [editZone]);
+
+        // Sync drawn coords into textarea display
+        React.useEffect(() => {
+          if (drawnCoords && drawnCoords.length > 0) {
+            const pairs = drawnCoords
+              .map(([lng, lat]) => `${lat}, ${lng}`)
+              .join("\n");
+            setManualInput(pairs);
+          }
+        }, [drawnCoords]);
+
+        function parseManualCoords(text) {
+          // Accept "lat, lng" one per line OR JSON array
+          const lines = text.trim().split(/\n|;/);
+          const coords = [];
+          for (const line of lines) {
+            const clean = line.trim().replace(/[[\]]/g, "");
+            if (!clean) continue;
+            const parts = clean.split(/[\s,]+/).map(Number);
+            if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+              // User enters lat,lng — convert to [lng,lat] for GeoJSON
+              coords.push([parts[1], parts[0]]);
+            }
+          }
+          return coords;
+        }
+
+        async function previewOnMap() {
+          const coords = parseManualCoords(manualInput);
+          if (coords.length < 3) {
+            notify("Need at least 3 coordinate pairs", "err");
+            return;
+          }
+          setResolving(true);
+          setPreviewStatus({ ok: null, msg: "Validating polygon…" });
+          try {
+            const result = await api(apiBase, "/api/zones/resolve-polygon", {
+              method: "POST",
+              body: { polygonCoords: coords },
+            });
+            onSaved.__previewPolygon &&
+              onSaved.__previewPolygon(result.boundary, result.center);
+            setPreviewStatus({
+              ok: true,
+              msg: `✓ Valid polygon — ${result.vertexCount} vertices`,
+            });
+          } catch (e) {
+            setPreviewStatus({ ok: false, msg: e.message });
+          } finally {
+            setResolving(false);
+          }
+        }
+
+        async function save() {
+          if (!name.trim()) {
+            notify("Zone name required", "err");
+            return;
+          }
+          // Prefer drawn coords, else parse manual input
+          let coords =
+            drawnCoords && drawnCoords.length >= 3
+              ? drawnCoords
+              : parseManualCoords(manualInput);
+          if (coords.length < 3) {
+            notify("Add at least 3 vertices / coordinates", "err");
+            return;
+          }
+
+          notify("Saving polygon zone…", "info");
+          try {
+            const body = {
+              name,
+              active,
+              polygonCoords: coords,
+              zoneType: "polygon",
+            };
+            if (editZone?._id) {
+              await api(apiBase, "/api/zones/" + editZone._id, {
+                method: "PUT",
+                body,
+              });
+              notify("Zone updated ✓", "ok");
+            } else {
+              await api(apiBase, "/api/zones", { method: "POST", body });
+              notify("Polygon zone created ✓", "ok");
+            }
+            onClearDraw();
+            setManualInput("");
+            onSaved();
+          } catch (e) {
+            notify(e.message, "err");
+          }
+        }
+
+        const vertexCount =
+          drawnCoords?.length || 0 || parseManualCoords(manualInput).length;
+
+        return (
+          <div className="sb-body">
+            <div className="fld">
+              <label>Zone Name</label>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Polygon Zone Name"
+              />
+            </div>
+
+            {/* Draw on map section */}
+            <div className="fld">
+              <label>Draw on Map</label>
+              <button
+                className={`poly-draw-btn${drawMode ? " active" : ""}`}
+                onClick={onDrawMode}
+              >
+                {drawMode
+                  ? "✏ Drawing… (click to add vertices)"
+                  : "✏ Start Drawing on Map"}
+              </button>
+              {drawMode && (
+                <div className="poly-hint">
+                  🖱 Click on the map to add vertices.
+                  <br />
+                  Double-click to finish the polygon.
+                  <br />
+                  Press ESC or click "Stop Drawing" to cancel.
+                </div>
+              )}
+              {drawnCoords && drawnCoords.length > 0 && (
+                <div className="poly-vertex-count">
+                  🔷 {drawnCoords.length} vertices drawn
+                  <button
+                    onClick={onClearDraw}
+                    style={{
+                      marginLeft: 8,
+                      background: "none",
+                      border: "1px solid var(--border2)",
+                      color: "var(--sub)",
+                      borderRadius: 4,
+                      padding: "1px 6px",
+                      cursor: "pointer",
+                      fontSize: 8,
+                    }}
+                  >
+                    ✕ Clear
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Manual coordinate entry */}
+            <div className="fld">
+              <label>Manual Coordinates</label>
+              <div
+                style={{
+                  fontFamily: "var(--mono)",
+                  fontSize: 8,
+                  color: "var(--sub)",
+                  marginBottom: 4,
+                }}
+              >
+                One vertex per line:{" "}
+                <strong style={{ color: "var(--text)" }}>lat, lng</strong>
+              </div>
+              <textarea
+                className="poly-coord-area"
+                rows={6}
+                value={manualInput}
+                onChange={(e) => setManualInput(e.target.value)}
+                placeholder={
+                  "28.6139, 77.2090\n28.6200, 77.2150\n28.6180, 77.2250\n..."
+                }
+              />
+              <button
+                className="pc-resolve-btn"
+                onClick={previewOnMap}
+                disabled={resolving || !manualInput.trim()}
+              >
+                {resolving ? "⏳ Validating…" : "🗺 Preview Polygon on Map"}
+              </button>
+              {previewStatus && (
+                <div
+                  className={`pc-status ${previewStatus.ok === null ? "loading" : previewStatus.ok ? "ok" : "err"}`}
+                >
+                  {previewStatus.msg}
+                </div>
+              )}
+            </div>
+
+            {vertexCount > 0 && (
+              <div
+                style={{
+                  fontFamily: "var(--mono)",
+                  fontSize: 9,
+                  color: "var(--purple)",
+                  marginBottom: 8,
+                  padding: "4px 8px",
+                  background: "rgba(179,136,255,0.06)",
+                  borderRadius: 5,
+                }}
+              >
+                🔷 {vertexCount} total vertices ready
+              </div>
+            )}
+
+            <div className="fld">
+              <label>Status</label>
+              <select
+                value={active}
+                onChange={(e) => setActive(e.target.value === "true")}
+              >
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+
+            <button className="btn btn-primary" onClick={save}>
+              💾 {editZone?._id ? "Update" : "Create"} Polygon Zone
+            </button>
+          </div>
+        );
+      }
+
+      /* ── PINCODE TRACKING PANEL ── */
+      function PincodeTrackingPanel({ users, liveUsers, zones }) {
+        const pincodeZones = zones.filter(
+          (z) => z.pincodes && z.pincodes.length > 0,
+        );
+        const usersWithPin = users.filter((u) => u.pincode);
+
+        if (pincodeZones.length === 0) {
+          return (
+            <div
+              style={{
+                padding: 16,
+                textAlign: "center",
+                fontFamily: "var(--mono)",
+                fontSize: 10,
+                color: "var(--muted)",
+              }}
+            >
+              <div style={{ fontSize: 28, marginBottom: 8 }}>📮</div>
+              No pincode zones defined yet.
+              <br />
+              Create a pincode zone using the "Pincode" tab above.
+            </div>
+          );
+        }
+
+        return (
+          <div style={{ padding: "12px 14px" }}>
+            {pincodeZones.map((zone) => {
+              const liveInZone = liveUsers.filter(
+                (u) =>
+                  u.zoneId === zone._id ||
+                  String(u.zoneId) === String(zone._id),
+              );
+
+              // Collect unique district info across pincodes of this zone
+              const districtInfo = zone.pincodeDistrictInfo || {};
+              const districts = [
+                ...new Set(
+                  Object.values(districtInfo)
+                    .map((d) => d.district)
+                    .filter(Boolean),
+                ),
+              ];
+              const states = [
+                ...new Set(
+                  Object.values(districtInfo)
+                    .map((d) => d.state)
+                    .filter(Boolean),
+                ),
+              ];
+
+              return (
+                <div key={zone._id} className="pc-admin-panel">
+                  <div className="pc-admin-title">
+                    📍 {zone.name}
+                    <span
+                      style={{
+                        color: "var(--sub)",
+                        marginLeft: 6,
+                        fontWeight: 400,
+                      }}
+                    >
+                      · {zone.pincodes.join(", ")}
+                    </span>
+                  </div>
+                  {/* District & state info */}
+                  {districts.length > 0 && (
+                    <div style={{ marginBottom: 6 }}>
+                      <span className="pc-district-badge">
+                        🏛 {districts.join(" · ")}
+                        {states.length > 0 && (
+                          <span style={{ opacity: 0.7 }}>, {states[0]}</span>
+                        )}
+                      </span>
+                    </div>
+                  )}
+                  {/* Per-pincode area breakdown */}
+                  {zone.pincodes.length > 0 &&
+                    Object.keys(districtInfo).length > 0 && (
+                      <div style={{ marginBottom: 8 }}>
+                        {zone.pincodes.map((pc) => {
+                          const info = districtInfo[pc];
+                          if (!info) return null;
+                          return (
+                            <div key={pc} className="pc-area-line">
+                              <span style={{ color: "var(--amber)" }}>
+                                📮 {pc}
+                              </span>
+                              {info.area && <span> — {info.area}</span>}
+                              {info.taluk && info.taluk !== info.area && (
+                                <span style={{ opacity: 0.6 }}>
+                                  , {info.taluk}
+                                </span>
+                              )}
+                              {info.district && (
+                                <span style={{ opacity: 0.6 }}>
+                                  {" "}
+                                  ({info.district})
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  {usersWithPin.length === 0 && liveInZone.length === 0 && (
+                    <div
+                      style={{
+                        color: "var(--muted)",
+                        fontSize: 9,
+                        fontFamily: "var(--mono)",
+                      }}
+                    >
+                      No users with pincodes registered.
+                    </div>
+                  )}
+                  {/* Live users tracked in this zone */}
+                  {liveInZone.length > 0 &&
+                    liveInZone.map((u) => (
+                      <div key={u._id} className="pc-user-row">
+                        <div
+                          className="u-dot"
+                          style={{
+                            background: u.isInside
+                              ? "var(--green)"
+                              : "var(--red)",
+                          }}
+                        />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div className="pc-user-name">{u.name}</div>
+                          <div
+                            style={{
+                              fontFamily: "var(--mono)",
+                              fontSize: 9,
+                              color: "var(--sub)",
+                            }}
+                          >
+                            {u.email}
+                          </div>
+                          {u.pincode && (
+                            <div className="u-pincode">📮 {u.pincode}</div>
+                          )}
+                        </div>
+                        <div
+                          className="pc-user-status"
+                          style={{
+                            color: u.isInside ? "var(--green)" : "var(--red)",
+                          }}
+                        >
+                          {u.isInside ? "▲ INSIDE" : "▼ OUTSIDE"}
+                        </div>
+                      </div>
+                    ))}
+                  {/* Registered users with matching pincodes (offline) */}
+                  {usersWithPin
+                    .filter((u) => zone.pincodes.includes(u.pincode))
+                    .filter((u) => !liveInZone.find((l) => l._id === u._id))
+                    .map((u) => (
+                      <div key={u._id} className="pc-user-row">
+                        <div
+                          className="u-dot"
+                          style={{ background: "var(--muted)" }}
+                        />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div className="pc-user-name">{u.name}</div>
+                          <div
+                            style={{
+                              fontFamily: "var(--mono)",
+                              fontSize: 9,
+                              color: "var(--sub)",
+                            }}
+                          >
+                            {u.email}
+                          </div>
+                          <div className="u-pincode">
+                            📮 {u.pincode} (registered)
+                          </div>
+                        </div>
+                        <div
+                          className="pc-user-status"
+                          style={{ color: "var(--muted)" }}
+                        >
+                          offline
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              );
+            })}
           </div>
         );
       }
@@ -774,13 +1805,23 @@
         const [pickMode, setPickMode] = useState(false);
         const [evtFilter, setEvtFilter] = useState("");
         const [sosReports, setSosReports] = useState([]);
-        const [activeTab, setActiveTab] = useState("events"); // "events" | "sos"
+        const [activeTab, setActiveTab] = useState("events"); // "events" | "checkins" | "pincodes"
         const [sosLightbox, setSosLightbox] = useState(null);
+        const [zoneFormTab, setZoneFormTab] = useState("circular"); // "circular" | "pincode" | "polygon"
+        const [previewLayer, setPreviewLayer] = useState(null); // leaflet layer for pincode preview
+
+        // Polygon drawing state
+        const [drawMode, setDrawMode] = useState(false);
+        const [drawnCoords, setDrawnCoords] = useState([]); // [[lng,lat],...]
+        const drawModeRef = useRef(false);
+        const drawnCoordsRef = useRef([]);
+        const drawLayerRef = useRef(null); // temp drawing layer
 
         const mapRef = useRef(null);
         const leafletRef = useRef(null);
         const zoneLayerRef = useRef(null);
         const userLayerRef = useRef(null);
+        const previewLayerRef = useRef(null);
         const pickModeRef = useRef(false);
         pickModeRef.current = pickMode;
 
@@ -789,9 +1830,75 @@
           setToasts((p) => [...p, { id, msg, type }]);
           setTimeout(
             () => setToasts((p) => p.filter((t) => t.id !== id)),
-            3500,
+            4000,
           );
         }, []);
+
+        /* Keep refs in sync */
+        drawModeRef.current = drawMode;
+        drawnCoordsRef.current = drawnCoords;
+
+        /* Toggle polygon draw mode */
+        function toggleDrawMode() {
+          const entering = !drawMode;
+          setDrawMode(entering);
+          if (!entering) {
+            // Finish/cancel drawing
+            redrawTempPolygon(drawnCoordsRef.current);
+          }
+        }
+
+        function clearDraw() {
+          setDrawnCoords([]);
+          drawnCoordsRef.current = [];
+          setDrawMode(false);
+          if (drawLayerRef.current && leafletRef.current) {
+            leafletRef.current.removeLayer(drawLayerRef.current);
+            drawLayerRef.current = null;
+          }
+        }
+
+        function redrawTempPolygon(coords) {
+          const L = window.L;
+          if (!leafletRef.current) return;
+          if (drawLayerRef.current) {
+            leafletRef.current.removeLayer(drawLayerRef.current);
+            drawLayerRef.current = null;
+          }
+          if (coords.length < 2) return;
+          // Draw dots for each vertex
+          const lg = L.layerGroup().addTo(leafletRef.current);
+          coords.forEach(([lng, lat], i) => {
+            L.circleMarker([lat, lng], {
+              radius: 5,
+              color: "#b388ff",
+              fillColor: i === 0 ? "#fff" : "#b388ff",
+              fillOpacity: 1,
+              weight: 2,
+            }).addTo(lg);
+          });
+          // Draw lines
+          if (coords.length >= 2) {
+            const latlngs = coords.map(([lng, lat]) => [lat, lng]);
+            L.polyline(latlngs, {
+              color: "#b388ff",
+              weight: 2,
+              dashArray: "6 3",
+            }).addTo(lg);
+          }
+          // If >= 3 vertices, show fill preview
+          if (coords.length >= 3) {
+            const latlngs = coords.map(([lng, lat]) => [lat, lng]);
+            L.polygon(latlngs, {
+              color: "#b388ff",
+              fillColor: "#b388ff",
+              fillOpacity: 0.1,
+              weight: 1.5,
+              dashArray: "6 3",
+            }).addTo(lg);
+          }
+          drawLayerRef.current = lg;
+        }
 
         /* Init map */
         useEffect(() => {
@@ -808,27 +1915,72 @@
           leafletRef.current = map;
 
           map.on("click", (e) => {
-            if (!pickModeRef.current) return;
-            setEditZone((prev) => ({
-              ...prev,
-              lat: e.latlng.lat.toFixed(6),
-              lng: e.latlng.lng.toFixed(6),
-            }));
-            setPickMode(false);
+            // Pick mode (circular zone center)
+            if (pickModeRef.current) {
+              setEditZone((prev) => ({
+                ...prev,
+                lat: e.latlng.lat.toFixed(6),
+                lng: e.latlng.lng.toFixed(6),
+              }));
+              setPickMode(false);
+              notify(
+                `Center set: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`,
+                "info",
+              );
+              return;
+            }
+            // Polygon draw mode
+            if (drawModeRef.current) {
+              const newCoord = [e.latlng.lng, e.latlng.lat];
+              const updated = [...drawnCoordsRef.current, newCoord];
+              drawnCoordsRef.current = updated;
+              setDrawnCoords([...updated]);
+              redrawTempPolygon(updated);
+            }
+          });
+
+          // Double-click finishes polygon drawing
+          map.on("dblclick", (e) => {
+            if (!drawModeRef.current) return;
+            L.DomEvent.stop(e);
+            const coords = drawnCoordsRef.current;
+            if (coords.length < 3) {
+              notify("Need at least 3 vertices to form a polygon", "err");
+              return;
+            }
+            setDrawMode(false);
+            drawModeRef.current = false;
+            redrawTempPolygon(coords);
             notify(
-              `Center: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`,
-              "info",
+              `✓ Polygon drawn — ${coords.length} vertices. Click Save to create zone.`,
+              "ok",
             );
           });
 
-          return () => map.remove();
+          // ESC key cancels draw
+          const onKey = (e) => {
+            if (e.key === "Escape" && drawModeRef.current) {
+              setDrawMode(false);
+              drawModeRef.current = false;
+              notify("Drawing cancelled", "info");
+            }
+          };
+          document.addEventListener("keydown", onKey);
+
+          return () => {
+            document.removeEventListener("keydown", onKey);
+            map.remove();
+          };
         }, []);
 
-        /* Toggle crosshair */
         useEffect(() => {
           if (mapRef.current)
-            mapRef.current.style.cursor = pickMode ? "crosshair" : "";
-        }, [pickMode]);
+            mapRef.current.style.cursor = pickMode
+              ? "crosshair"
+              : drawMode
+                ? "crosshair"
+                : "";
+        }, [pickMode, drawMode]);
 
         /* Render zones on map */
         useEffect(() => {
@@ -836,24 +1988,64 @@
           if (!zoneLayerRef.current) return;
           zoneLayerRef.current.clearLayers();
           zones.forEach((z) => {
-            const col = z.active ? "#00e676" : "#3d4460";
-            L.circle([z.lat, z.lng], {
-              radius: z.radius,
+            // Color by type: green=circular, cyan=pincode, purple=polygon; dim if inactive
+            const isPolygon = z.zoneType === "polygon";
+            const isPincode = z.pincodes?.length > 0;
+            const baseCol = isPolygon
+              ? "#b388ff"
+              : isPincode
+                ? "#00bcd4"
+                : "#00e676";
+            const col = z.active ? baseCol : "#3d4460";
+            const style = {
               color: col,
               fillColor: col,
-              fillOpacity: 0.06,
+              fillOpacity: 0.07,
               weight: 1.5,
-              dashArray: "6 4",
-            }).addTo(zoneLayerRef.current);
+              dashArray: isPolygon ? "4 3" : "6 4",
+            };
+
+            if (
+              z.boundary &&
+              z.boundary.type === "Polygon" &&
+              z.boundary.coordinates
+            ) {
+              // Pincode or drawn polygon — convert [lng,lat] → [lat,lng] for Leaflet
+              const latlngs = z.boundary.coordinates[0].map(([lng, lat]) => [
+                lat,
+                lng,
+              ]);
+              const label = isPolygon
+                ? `${z.name}<br>🔷 Drawn Polygon · ${z.boundary.coordinates[0].length - 1} vertices`
+                : `${z.name}<br>📮 ${z.pincodes.join(", ")}`;
+              L.polygon(latlngs, style)
+                .bindTooltip(
+                  `<span style="font-family:JetBrains Mono,monospace;font-size:10px;color:${col}">${label}</span>`,
+                  { direction: "top" },
+                )
+                .addTo(zoneLayerRef.current);
+            } else {
+              L.circle([z.lat, z.lng], { radius: z.radius, ...style }).addTo(
+                zoneLayerRef.current,
+              );
+            }
+
+            // Centre marker
+            const centerLabel = isPolygon
+              ? `${z.name}<br>🔷 Polygon centroid`
+              : isPincode
+                ? `${z.name}<br>📮 ${z.pincodes.join(", ")}`
+                : `${z.name}<br>⊙ ${fmtDist(z.radius)}`;
+
             L.circleMarker([z.lat, z.lng], {
-              radius: 6,
+              radius: 5,
               color: "#000",
               fillColor: col,
               fillOpacity: 1,
               weight: 2,
             })
               .bindTooltip(
-                `<span style="font-family:JetBrains Mono,monospace;font-size:10px">${z.name}<br>${fmtDist(z.radius)}</span>`,
+                `<span style="font-family:JetBrains Mono,monospace;font-size:10px;color:${col}">${centerLabel}</span>`,
                 { direction: "top" },
               )
               .addTo(zoneLayerRef.current);
@@ -868,6 +2060,55 @@
           liveUsers.forEach((u) => {
             if (!u.lat || !u.lng) return;
             const col = u.isInside ? "#00e676" : "#ff3d5a";
+            const pinInfo = u.pincode ? `<br>📮 ${u.pincode}` : "";
+
+            // Avatar HTML for popup
+            const avatarBg = u.profileImageUrl
+              ? "transparent"
+              : avatarColors(u.name);
+            const avatarHtml = u.profileImageUrl
+              ? `<img src="${u.profileImageUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" alt="${u.name}" />`
+              : `<span style="font-size:18px;font-weight:700;color:#000">${initials(u.name)}</span>`;
+
+            const lastSeen = u.lastSeen
+              ? new Date(u.lastSeen).toLocaleString()
+              : "—";
+            const dist =
+              u.distanceToCenter != null ? fmtDist(u.distanceToCenter) : "—";
+
+            const popupHtml = `
+              <div class="user-popup">
+                <div class="user-popup-avatar" style="background:${avatarBg};display:flex;align-items:center;justify-content:center">
+                  ${avatarHtml}
+                </div>
+                <div class="user-popup-name">${u.name}</div>
+                <div class="user-popup-email">${u.email}</div>
+                <div class="user-popup-row">
+                  <span>Status</span>
+                  <span style="color:${col};font-weight:700">${u.isInside ? "▲ Inside Zone" : "▼ Outside Zone"}</span>
+                </div>
+                ${u.pincode ? `<div class="user-popup-row"><span>Pincode</span><span>📮 ${u.pincode}</span></div>` : ""}
+                <div class="user-popup-row"><span>Distance</span><span>${dist}</span></div>
+                <div class="user-popup-row"><span>Coords</span><span>${u.lat.toFixed(4)}, ${u.lng.toFixed(4)}</span></div>
+                <div class="user-popup-row"><span>Last seen</span><span>${lastSeen}</span></div>
+                <div style="margin-top:8px;text-align:center">
+                  <a href="https://www.google.com/maps?q=${u.lat},${u.lng}" target="_blank" rel="noopener"
+                    style="font-family:JetBrains Mono,monospace;font-size:9px;color:var(--cyan);text-decoration:none">
+                    ↗ Open in Maps
+                  </a>
+                </div>
+              </div>
+            `;
+
+            // Outer ring marker for "live pulse" effect
+            L.circleMarker([u.lat, u.lng], {
+              radius: 13,
+              color: col,
+              fillColor: col,
+              fillOpacity: 0.12,
+              weight: 1,
+            }).addTo(userLayerRef.current);
+
             L.circleMarker([u.lat, u.lng], {
               radius: 7,
               color: "#000",
@@ -876,12 +2117,40 @@
               weight: 2,
             })
               .bindTooltip(
-                `<span style="font-family:JetBrains Mono,monospace;font-size:10px;color:${col}">${u.name}<br>${u.email}<br>${u.isInside ? "▲ Inside" : "▼ Outside"} · ${fmtDist(u.distanceToCenter)}</span>`,
+                `<span style="font-family:JetBrains Mono,monospace;font-size:10px;color:${col}">${u.name}<br>${u.email}${pinInfo}<br>${u.isInside ? "▲ Inside" : "▼ Outside"} · ${dist}</span>`,
                 { direction: "top" },
               )
+              .bindPopup(popupHtml, {
+                maxWidth: 240,
+                className: "user-profile-popup",
+              })
               .addTo(userLayerRef.current);
           });
         }, [liveUsers]);
+
+        /* Preview pincode polygon on map */
+        function handlePreviewPolygon(boundary, center) {
+          const L = window.L;
+          if (previewLayerRef.current) {
+            leafletRef.current.removeLayer(previewLayerRef.current);
+            previewLayerRef.current = null;
+          }
+          if (!boundary || boundary.type !== "Polygon") return;
+          const latlngs = boundary.coordinates[0].map(([lng, lat]) => [
+            lat,
+            lng,
+          ]);
+          const layer = L.polygon(latlngs, {
+            color: "#00bcd4",
+            fillColor: "#00bcd4",
+            fillOpacity: 0.12,
+            weight: 2,
+            dashArray: "8 4",
+          }).addTo(leafletRef.current);
+          previewLayerRef.current = layer;
+          leafletRef.current.fitBounds(layer.getBounds().pad(0.15));
+          notify("Polygon preview shown on map", "info");
+        }
 
         async function loadAll() {
           try {
@@ -1037,34 +2306,85 @@
 
             {/* SIDEBAR */}
             <aside className="sidebar">
-              {/* Zone form */}
+              {/* Zone form with tab: circular / pincode */}
               <div className="sb-sec">
                 <div className="sb-sec-hdr">
                   ➕ {editZone?._id ? "Edit Zone" : "New Zone"}
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <button
-                      className="btn-sm btn-ghost"
-                      style={{ padding: "3px 8px", fontSize: 8 }}
-                      onClick={() => {
-                        setPickMode((p) => !p);
-                      }}
-                    >
-                      {pickMode ? "Cancel Pick" : "Pick on Map"}
-                    </button>
-                    <span className="sb-sec-badge">
-                      {editZone?._id ? "EDIT" : "NEW"}
-                    </span>
-                  </div>
+                  <span className="sb-sec-badge">
+                    {editZone?._id ? "EDIT" : "NEW"}
+                  </span>
                 </div>
-                <ZoneForm
-                  apiBase={apiBase}
-                  editZone={editZone}
-                  onSaved={() => {
-                    setEditZone(null);
-                    loadAll();
-                  }}
-                  notify={notify}
-                />
+                <div className="zone-tabs">
+                  <button
+                    className={`ztab ${zoneFormTab === "circular" ? "active" : ""}`}
+                    onClick={() => {
+                      setZoneFormTab("circular");
+                      clearDraw();
+                    }}
+                  >
+                    ⊙ Circular
+                  </button>
+                  <button
+                    className={`ztab ${zoneFormTab === "pincode" ? "active" : ""}`}
+                    onClick={() => {
+                      setZoneFormTab("pincode");
+                      clearDraw();
+                    }}
+                  >
+                    📮 Pincode
+                  </button>
+                  <button
+                    className={`ztab ${zoneFormTab === "polygon" ? "active" : ""}`}
+                    onClick={() => {
+                      setZoneFormTab("polygon");
+                      setPickMode(false);
+                    }}
+                  >
+                    🔷 Polygon
+                  </button>
+                </div>
+                {zoneFormTab === "circular" ? (
+                  <CircularZoneForm
+                    apiBase={apiBase}
+                    editZone={editZone}
+                    onSaved={() => {
+                      setEditZone(null);
+                      loadAll();
+                    }}
+                    notify={notify}
+                    onPickMode={() => setPickMode((p) => !p)}
+                    pickMode={pickMode}
+                  />
+                ) : zoneFormTab === "pincode" ? (
+                  <PincodeZoneForm
+                    apiBase={apiBase}
+                    editZone={editZone}
+                    onSaved={() => {
+                      setEditZone(null);
+                      loadAll();
+                    }}
+                    notify={notify}
+                    onPreviewPolygon={handlePreviewPolygon}
+                  />
+                ) : (
+                  <PolygonZoneForm
+                    apiBase={apiBase}
+                    editZone={editZone}
+                    onSaved={Object.assign(
+                      () => {
+                        setEditZone(null);
+                        clearDraw();
+                        loadAll();
+                      },
+                      { __previewPolygon: handlePreviewPolygon },
+                    )}
+                    notify={notify}
+                    onDrawMode={toggleDrawMode}
+                    drawMode={drawMode}
+                    drawnCoords={drawnCoords}
+                    onClearDraw={clearDraw}
+                  />
+                )}
                 {editZone?._id && (
                   <div style={{ padding: "0 14px 12px" }}>
                     <button
@@ -1100,7 +2420,7 @@
                       className={`zone-item ${selZone === z._id ? "sel" : ""}`}
                       onClick={() => {
                         setSelZone(z._id);
-                        leafletRef.current?.setView([z.lat, z.lng], 15);
+                        leafletRef.current?.setView([z.lat, z.lng], 14);
                       }}
                     >
                       <div className="zi-name">
@@ -1114,6 +2434,12 @@
                         >
                           {z.name}
                         </span>
+                        {z.zoneType === "polygon" && (
+                          <span className="zi-badge zi-poly">🔷</span>
+                        )}
+                        {z.pincodes?.length > 0 && (
+                          <span className="zi-badge zi-pc">📮</span>
+                        )}
                         <span
                           className={`zi-badge ${z.active ? "zi-on" : "zi-off"}`}
                         >
@@ -1121,10 +2447,22 @@
                         </span>
                       </div>
                       <div className="zi-meta">
-                        <span>
-                          📍 {z.lat.toFixed(4)}, {z.lng.toFixed(4)}
-                        </span>
-                        <span>⊙ {fmtDist(z.radius)}</span>
+                        {z.zoneType === "polygon" ? (
+                          <span>
+                            🔷 Drawn polygon ·{" "}
+                            {z.boundary?.coordinates?.[0]?.length - 1 || "?"}{" "}
+                            vertices
+                          </span>
+                        ) : z.pincodes?.length > 0 ? (
+                          <span>📮 {z.pincodes.join(", ")}</span>
+                        ) : (
+                          <>
+                            <span>
+                              📍 {z.lat.toFixed(4)}, {z.lng.toFixed(4)}
+                            </span>
+                            <span>⊙ {fmtDist(z.radius)}</span>
+                          </>
+                        )}
                       </div>
                       <div className="zi-acts">
                         <button
@@ -1132,6 +2470,14 @@
                           onClick={(e) => {
                             e.stopPropagation();
                             setEditZone(z);
+                            clearDraw();
+                            setZoneFormTab(
+                              z.zoneType === "polygon"
+                                ? "polygon"
+                                : z.pincodes?.length
+                                  ? "pincode"
+                                  : "circular",
+                            );
                           }}
                         >
                           ✏ Edit
@@ -1151,7 +2497,7 @@
                 </div>
               </div>
 
-              {/* Live + Registered Users */}
+              {/* Users */}
               <div className="sb-sec" style={{ flex: 1 }}>
                 <div className="sb-sec-hdr">
                   👤 Users<span className="sb-sec-badge">{users.length}</span>
@@ -1173,40 +2519,51 @@
                       (l) => l._id === u._id || l.email === u.email,
                     );
                     const isLive = !!live;
+                    const dotColor = isLive
+                      ? u.isInside
+                        ? "var(--green)"
+                        : "var(--red)"
+                      : "var(--muted)";
                     return (
                       <div key={u._id} className="user-item">
                         <div
                           className="u-dot"
+                          style={{ background: dotColor }}
+                        />
+                        {/* Profile image or initials */}
+                        <div
+                          className="u-avatar"
                           style={{
-                            background: isLive
+                            background: u.profileImageUrl
+                              ? "transparent"
+                              : avatarColors(u.name),
+                          }}
+                        >
+                          {u.profileImageUrl ? (
+                            <img src={u.profileImageUrl} alt={u.name} />
+                          ) : (
+                            initials(u.name)
+                          )}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div className="u-name">{u.name}</div>
+                          <div className="u-email">{u.email}</div>
+                          {u.pincode && (
+                            <div className="u-pincode">📮 {u.pincode}</div>
+                          )}
+                        </div>
+                        <span
+                          className="u-status"
+                          style={{
+                            color: isLive
                               ? u.isInside
                                 ? "var(--green)"
                                 : "var(--red)"
                               : "var(--muted)",
                           }}
-                        />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div className="u-name">{u.name}</div>
-                          <div className="u-email">{u.email}</div>
-                        </div>
-                        {isLive && (
-                          <span
-                            className="u-status"
-                            style={{
-                              color: u.isInside ? "var(--green)" : "var(--red)",
-                            }}
-                          >
-                            {u.isInside ? "▲ IN" : "▼ OUT"}
-                          </span>
-                        )}
-                        {!isLive && (
-                          <span
-                            className="u-status"
-                            style={{ color: "var(--muted)" }}
-                          >
-                            offline
-                          </span>
-                        )}
+                        >
+                          {isLive ? (u.isInside ? "▲ IN" : "▼ OUT") : "offline"}
+                        </span>
                       </div>
                     );
                   })}
@@ -1216,7 +2573,6 @@
 
             {/* MAIN AREA */}
             <main className="main-area">
-              {/* Map */}
               <div className="map-wrap">
                 <div
                   id="map"
@@ -1226,11 +2582,13 @@
                 <div className="map-hint">
                   {pickMode
                     ? "⌖ Click anywhere to set zone center"
-                    : "🟡 Center  🟢 Inside user  🔴 Outside user"}
+                    : drawMode
+                      ? `✏ Click to add vertices (${drawnCoords.length} so far) · Double-click to finish · ESC to cancel`
+                      : "🟡 Zone center  🟢 Inside  🔴 Outside  🔵 Pincode/Polygon preview"}
                 </div>
               </div>
 
-              {/* Events + Check-ins tabbed panel */}
+              {/* Tabbed panel */}
               <div className="events-panel">
                 <div
                   className="ep-hdr"
@@ -1240,67 +2598,57 @@
                   }}
                 >
                   <div style={{ display: "flex", gap: 0 }}>
-                    <button
-                      onClick={() => setActiveTab("events")}
-                      style={{
-                        background:
-                          activeTab === "events" ? "var(--s2)" : "transparent",
-                        border: "none",
-                        borderBottom:
-                          activeTab === "events"
-                            ? "2px solid var(--green)"
-                            : "2px solid transparent",
-                        color:
-                          activeTab === "events"
-                            ? "var(--text)"
-                            : "var(--muted)",
-                        padding: "8px 16px",
-                        cursor: "pointer",
-                        fontSize: 11,
-                        fontFamily: "var(--mono)",
-                      }}
-                    >
-                      📋 Event Log ({events.length})
-                    </button>
-                    <button
-                      onClick={() => setActiveTab("checkins")}
-                      style={{
-                        background:
-                          activeTab === "checkins"
-                            ? "var(--s2)"
-                            : "transparent",
-                        border: "none",
-                        borderBottom:
-                          activeTab === "checkins"
-                            ? "2px solid var(--green)"
-                            : "2px solid transparent",
-                        color:
-                          activeTab === "checkins"
-                            ? "var(--green)"
-                            : "var(--muted)",
-                        padding: "8px 16px",
-                        cursor: "pointer",
-                        fontSize: 11,
-                        fontFamily: "var(--mono)",
-                      }}
-                    >
-                      📸 Check-Ins{" "}
-                      {sosReports.length > 0 && (
-                        <span
-                          style={{
-                            background: "var(--green)",
-                            color: "#000",
-                            borderRadius: 10,
-                            padding: "1px 6px",
-                            marginLeft: 5,
-                            fontSize: 9,
-                            fontWeight: 700,
-                          }}
-                        >
-                          {sosReports.length}
-                        </span>
-                      )}
-                    </button>
+                    {[
+                      {
+                        key: "events",
+                        label: `📋 Event Log (${events.length})`,
+                      },
+                      {
+                        key: "checkins",
+                        label: "📸 Check-Ins",
+                        badge: sosReports.length,
+                      },
+                      { key: "pincodes", label: "📮 Pincode Tracking" },
+                    ].map((t) => (
+                      <button
+                        key={t.key}
+                        onClick={() => setActiveTab(t.key)}
+                        style={{
+                          background:
+                            activeTab === t.key ? "var(--s2)" : "transparent",
+                          border: "none",
+                          borderBottom:
+                            activeTab === t.key
+                              ? "2px solid var(--cyan)"
+                              : "2px solid transparent",
+                          color:
+                            activeTab === t.key
+                              ? "var(--text)"
+                              : "var(--muted)",
+                          padding: "8px 14px",
+                          cursor: "pointer",
+                          fontSize: 11,
+                          fontFamily: "var(--mono)",
+                        }}
+                      >
+                        {t.label}
+                        {t.badge > 0 && (
+                          <span
+                            style={{
+                              background: "var(--green)",
+                              color: "#000",
+                              borderRadius: 10,
+                              padding: "1px 6px",
+                              marginLeft: 5,
+                              fontSize: 9,
+                              fontWeight: 700,
+                            }}
+                          >
+                            {t.badge}
+                          </span>
+                        )}
+                      </button>
+                    ))}
                   </div>
                   <div
                     style={{
@@ -1346,6 +2694,15 @@
                         className="conn-btn"
                         style={{ padding: "4px 10px", fontSize: 8 }}
                         onClick={loadSos}
+                      >
+                        ↺ Refresh
+                      </button>
+                    )}
+                    {activeTab === "pincodes" && (
+                      <button
+                        className="conn-btn"
+                        style={{ padding: "4px 10px", fontSize: 8 }}
+                        onClick={loadAll}
                       >
                         ↺ Refresh
                       </button>
@@ -1411,7 +2768,7 @@
                   </div>
                 )}
 
-                {/* Check-ins tab — each user in their own section */}
+                {/* Check-ins tab */}
                 {activeTab === "checkins" &&
                   (() => {
                     const byUser = {};
@@ -1461,7 +2818,6 @@
                                   overflow: "hidden",
                                 }}
                               >
-                                {/* User header row */}
                                 <div
                                   style={{
                                     background: "var(--s3)",
@@ -1494,12 +2850,7 @@
                                         flexShrink: 0,
                                       }}
                                     >
-                                      {(group.name || "?")
-                                        .split(" ")
-                                        .map((w) => w[0])
-                                        .join("")
-                                        .toUpperCase()
-                                        .slice(0, 2)}
+                                      {initials(group.name || "?")}
                                     </div>
                                     <div>
                                       <div
@@ -1537,12 +2888,11 @@
                                     {group.reports.length !== 1 ? "s" : ""}
                                   </div>
                                 </div>
-                                {/* Photo grid for this user only */}
                                 <div
                                   style={{
                                     display: "grid",
                                     gridTemplateColumns:
-                                      "repeat(auto-fill, minmax(180px, 1fr))",
+                                      "repeat(auto-fill,minmax(180px,1fr))",
                                     gap: 10,
                                     padding: 12,
                                   }}
@@ -1647,6 +2997,17 @@
                       </div>
                     );
                   })()}
+
+                {/* Pincode tracking tab */}
+                {activeTab === "pincodes" && (
+                  <div className="ep-scroll">
+                    <PincodeTrackingPanel
+                      users={users}
+                      liveUsers={liveUsers}
+                      zones={zones}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Lightbox */}
